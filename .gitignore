@@ -27,5 +27,9 @@ logs/
 *.log
 data/local/
 
+# Generated document outputs (reproducible artifacts)
+out/
+out_*/
+
 # Cursor (optional: uncomment if you do not want to commit project skills)
 # .cursor/skills/
