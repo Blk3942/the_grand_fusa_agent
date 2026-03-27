@@ -1,0 +1,78 @@
+template_type: base-excel
+version: v0.1
+workbook:
+  sheets:
+  - name: Cover
+    kind: key_value
+    rows:
+    - key: title
+      value_path: meta.title
+  - name: Document Change History （文档履历）
+    kind: table
+    columns:
+    - Version
+    - Status
+    - Author
+    - Date
+    - Approver
+    - Approve Date
+    - Description
+    source: base.change_history_document
+    mapping:
+      Version: version
+      Status: status
+      Author: author
+      Date: date
+      Approver: approver
+      Approve Date: approve_date
+      Description: description
+  - name: Template Change History （模板履历）
+    kind: table
+    columns:
+    - Version
+    - Status
+    - Author
+    - Date
+    - Approver
+    - Approve Date
+    - Description
+    source: base.change_history_template
+    mapping:
+      Version: version
+      Status: status
+      Author: author
+      Date: date
+      Approver: approver
+      Approve Date: approve_date
+      Description: description
+  - name: General Information（一般信息）
+    kind: table
+    columns:
+    - Document Purpose（文档目的）
+    - Document Scope（文档范围）
+    source: base.general_information
+    mapping:
+      Document Purpose（文档目的）: purpose
+      Document Scope（文档范围）: scope
+  - name: Input （输入文档）
+    kind: table
+    columns:
+    - Document No.
+    - File name
+    - Version
+    source: base.input_documents
+    mapping:
+      Document No.: document_no
+      File name: file_name
+      Version: version
+  - name: References（参考文档）
+    kind: table
+    columns:
+    - Document No.
+    - File name
+    - Version
+    source: base.references
+    mapping:
+      Document No.: document_no
+      File name: file_name
+      Version: version

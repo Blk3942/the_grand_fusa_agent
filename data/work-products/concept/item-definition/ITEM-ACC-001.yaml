@@ -1,0 +1,198 @@
+meta:
+  doc_id: ITEM-ACC-001
+  title: ACC（自适应巡航控制）Item Definition（相关项定义）
+  work_product_type: item-definition
+  iso_ref:
+    - ISO 26262-3
+  asil: 待定
+  status: Draft
+  owner: 系统安全团队（待定）
+  reviewers: []
+  version: v0.1
+  baseline: 未基线
+  last_updated: 2026-03-27
+
+base:
+  purpose: 定义 ACC（Adaptive Cruise Control，自适应巡航控制）功能在项目中的功能边界、外部接口、运行场景与约束，作为后续 HARA 与 FSC 的上游输入。
+  scope_boundary:
+    system_function_boundary:
+      - 在限定工况下自动维持设定车速，并根据前车目标调节纵向加减速以保持设定车距
+      - 涵盖 ACC 的激活/保持/退出逻辑、目标选择与跟驰控制请求输出（不含底盘执行闭环细节）
+    v_model_stage:
+      - 概念
+  inputs_references:
+    - id: PRD-ACC-001
+      name: ACC 功能需求
+      version: v0.1
+      source: 产品需求文档
+      note: 待提供
+    - id: SYS-ARCH-001
+      name: 系统架构说明
+      version: v0.4
+      source: 系统架构文档
+      note: 草案
+    - id: IF-SPEC-ACC-001
+      name: ACC 对外接口说明
+      version: v0.1
+      source: 系统接口规范
+      note: 待提供
+  standard_requirements:
+    - standard: ISO 26262
+      part_clause: Part 3（Concept Phase）
+      applicability: Item Definition 作为 HARA 输入，需明确功能边界、接口与场景假设
+      evidence_ref: SYS-REV-ACC-ITEM-001（计划）
+  project_assumptions:
+    - id: ASM-ACC-ITEM-001
+      assumption: 车辆具备可用的前向目标探测能力（如雷达/摄像头融合，按项目配置）并提供目标有效位/置信度
+      impact: 目标检测与跟驰控制请求
+      risk_if_invalid: 漏检/误检导致跟驰距离控制失效
+      verification: 传感器与感知链路集成验证（场景集/实车）
+    - id: ASM-ACC-ITEM-002
+      assumption: 底盘/动力系统能够按 ACC 请求执行纵向加减速，并返回执行状态与限制信息（如制动温度/可用性）
+      impact: 纵向控制闭环与退出策略
+      risk_if_invalid: 请求无法执行或执行不一致导致距离失控
+      verification: 接口联调 + 端到端纵向控制测试
+    - id: ASM-ACC-ITEM-003
+      assumption: HMI 告警与驾驶员接管链路可用（显示/蜂鸣/方向盘按键/踏板输入等）
+      impact: 可控性与退出/降级提示
+      risk_if_invalid: 驾驶员无法及时理解或接管
+      verification: HMI 联调 + 用户试验/评审
+  traceability:
+    - item_id: ITM-ACC-001
+      upstream: PRD-ACC-001
+      downstream: HARA-ACC-001（待建）/FSC-ACC-001（待建）
+      verification_method: 评审
+      evidence_id: SYS-REV-ACC-ITEM-001（计划）
+  open_verification_items:
+    - id: OVI-ACC-ITEM-001
+      item: 目标切换/插队场景下的跟驰策略与最小安全车距约束
+      owner: 待定
+      due: 待定
+      status: Open
+    - id: OVI-ACC-ITEM-002
+      item: 低附着（雨雪冰）与坡道场景下纵向控制能力边界与退出策略
+      owner: 待定
+      due: 待定
+      status: Open
+    - id: OVI-ACC-ITEM-003
+      item: 传感器遮挡/脏污/强反光导致目标置信度下降时的降级与告警策略
+      owner: 待定
+      due: 待定
+      status: Open
+  review_approval:
+    - role: 作者
+      name: 系统安全工程师（待定）
+      conclusion: N/A
+      date: 2026-03-27
+    - role: 评审者
+      name: 系统工程负责人（待定）
+      conclusion: 待填写
+      date: 待填写
+    - role: 批准者
+      name: 功能安全经理（待定）
+      conclusion: 待填写
+      date: 待填写
+  change_history:
+    - version: v0.1
+      date: 2026-03-27
+      summary: 创建 ACC Item Definition 草案
+      reason: 概念阶段初始化
+      author: AI Assistant
+  notes_boundary:
+    - 本文档为 Item Definition 草案，不构成 ASIL 等级最终结论。
+    - ASIL 定级需在 HARA 中按场景完成 S/E/C 评估并基于项目数据冻结。
+    - 对“无故障但性能不足/误用”引发风险的部分，应另行开展 ISO 21448（SOTIF）分析并与 ISO 26262 结论分开记录。
+
+content:
+  item_overview:
+    item_name: ACC（Adaptive Cruise Control，自适应巡航控制）
+    functional_objective: 在限定工况下自动维持设定车速，并基于前向目标信息调节纵向加减速以保持设定车距；当系统能力不足或驾驶员操作时，退出 ACC 并提示驾驶员接管。
+    non_safety_objectives:
+      - 提升跟驰舒适性（平顺加减速）
+      - 减少误触发告警与不必要退出
+      - 适应常见交通流变化（插队/加塞）
+  boundary_interfaces:
+    in_scope:
+      - ACC 激活/保持/退出与恢复逻辑
+      - 目标检测结果使用（目标距离/相对速度/置信度）与目标选择策略
+      - 纵向控制请求输出（加速度/减速度目标、车距设定等，按架构）
+      - 降级与告警策略（传感器不可用、执行限制等）
+    out_of_scope:
+      - 底盘执行闭环控制算法细节（由底盘/动力域实现）
+      - 横向控制（车道保持、转向控制等）
+      - 交通标志识别的法规策略（若涉及限速控制，需单独界定）
+    interfaces:
+      - id: IF-ACC-001
+        object: 感知系统（雷达/摄像头/融合，按项目）
+        direction: 输入
+        signal: 前向目标列表（距离/相对速度/置信度/ID）、目标有效位
+        normal_range: 周期与时延满足 ACC 控制周期，置信度满足最小要求
+        abnormal_handling: 置信度不足或目标丢失时进入保守跟驰/退出并告警
+      - id: IF-ACC-002
+        object: 车辆状态总线（CAN/Ethernet）
+        direction: 输入
+        signal: 车速、纵向加速度、档位、制动状态、踏板/按键输入、ESC/ABS 状态
+        normal_range: 信号有效且周期满足控制需求
+        abnormal_handling: 关键状态失效触发退出 ACC 并上报故障
+      - id: IF-ACC-003
+        object: 底盘/动力/制动控制器或域控
+        direction: 输出
+        signal: 纵向加减速请求/目标、功能状态与有效位、限制请求
+        normal_range: 下游确认接收并反馈执行状态/限制原因
+        abnormal_handling: 通信超时/拒绝执行时退出 ACC 并告警
+      - id: IF-ACC-004
+        object: HMI
+        direction: 输出
+        signal: ACC 可用/激活/退出、接管告警、原因码、车距设定显示
+        normal_range: 告警通路可用且优先级正确
+        abnormal_handling: HMI 不可用时禁止激活或强制退出
+  operating_scenarios:
+    - id: SCN-ACC-001
+      description: 高速跟驰巡航（前车稳定）
+      conditions: 高速道路，良好天气，车速 60-120 km/h（以项目为准）
+      driver_state: 正常驾驶，手握方向盘监督
+      note: 基线场景
+    - id: SCN-ACC-002
+      description: 城市快速路车流变化（插队/切入）
+      conditions: 30-90 km/h，车流密集，前车频繁变道
+      driver_state: 注意力需要保持，可能频繁介入
+      note: 目标切换关键场景
+    - id: SCN-ACC-003
+      description: 下坡/弯道导致制动能力受限或目标误差增大
+      conditions: 坡道/弯道，路面附着变化
+      driver_state: 需要随时介入
+      note: 执行限制与退出策略场景
+    - id: SCN-ACC-004
+      description: 恶劣天气/传感器遮挡导致目标置信度下降
+      conditions: 大雨/雾/强反光，传感器脏污/遮挡
+      driver_state: 需要及时接管
+      note: 降级/告警场景
+  dependencies_constraints:
+    - id: DEP-ACC-001
+      dependency: 前向目标检测与置信度输出
+      constraint: 关键目标在最小距离范围内可检测，输出时延受控
+      impact_if_failed: 漏检/误检导致跟驰距离控制失效
+    - id: DEP-ACC-002
+      dependency: 底盘/动力执行能力
+      constraint: 在典型工况下可提供足够减速度与响应
+      impact_if_failed: 跟驰减速不足导致追尾风险上升
+    - id: DEP-ACC-003
+      dependency: 驾驶员告警与接管机制
+      constraint: 告警可达、可理解，接管输入可被系统可靠识别
+      impact_if_failed: 可控性下降，退出后驾驶员无法及时接管
+  known_failures_initial_concerns:
+    - id: CON-ACC-001
+      concern: 漏检前车或目标切换错误导致未及时减速，车距不足
+      source: 经验/评审
+      severity_preliminary: 待定
+      downstream: 输入 HARA 危害事件
+    - id: CON-ACC-002
+      concern: 错误加速/减速请求导致突兀纵向控制，引发追尾或被追尾风险
+      source: 评审
+      severity_preliminary: 待定
+      downstream: 输入 HARA 危害事件
+    - id: CON-ACC-003
+      concern: 能力不足场景未及时退出或告警不明确，驾驶员未及时接管
+      source: 人机评审
+      severity_preliminary: 待定
+      downstream: 输入 HARA（可控性假设）

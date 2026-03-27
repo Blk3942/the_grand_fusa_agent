@@ -4,3 +4,8 @@
 # openai>=1.0.0
 # pydantic>=2.0.0
 # pydantic-settings>=2.0.0
+
+# Document generation (YAML -> MD/DOCX/XLSX)
+pyyaml
+python-docx
+openpyxl

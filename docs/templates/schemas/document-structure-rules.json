@@ -1,0 +1,38 @@
+{
+  "required_frontmatter_keys": [
+    "doc_id",
+    "title",
+    "work_product_type",
+    "iso_ref",
+    "asil",
+    "status",
+    "owner",
+    "version",
+    "last_updated"
+  ],
+  "required_h1_sections_global": [
+    "Change History（变更历史）",
+    "General Information（一般信息）",
+    "Terms and Abbreviations（术语与缩略语）",
+    "正文内容（Main Content）",
+    "可追溯性（Traceability）",
+    "待验证项（Open Verification Items）",
+    "评审与批准（Review and Approval）"
+  ],
+  "work_product_specific_keywords": {
+    "item-definition": [
+      "Item 概述",
+      "边界与接口",
+      "运行场景与运行条件"
+    ],
+    "hara": [
+      "危害事件",
+      "风险评估",
+      "安全目标"
+    ],
+    "fsc": [
+      "功能安全策略",
+      "功能安全要求"
+    ]
+  }
+}

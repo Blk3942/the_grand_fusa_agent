@@ -1,0 +1,209 @@
+meta:
+  doc_id: ITEM-NOA-001
+  title: NOA（导航辅助驾驶/领航辅助）Item Definition（相关项定义）
+  work_product_type: item-definition
+  iso_ref:
+    - ISO 26262-3
+  asil: 待定
+  status: Draft
+  owner: 系统安全团队（待定）
+  reviewers: []
+  version: v0.1
+  baseline: 未基线
+  last_updated: 2026-03-27
+
+base:
+  purpose: 定义 NOA 功能在项目中的功能边界、外部接口、运行场景与约束，作为后续 HARA 与 FSC 的上游输入。
+  scope_boundary:
+    system_function_boundary:
+      - NOA 作为 L2/L2+ 驾驶辅助（等级与法规/ODD 以项目定义为准），在限定 ODD 内提供纵向/横向辅助与变道建议/执行（若支持）
+      - NOA 依赖导航/地图/定位与环境感知，输出对执行层的目标轨迹/控制请求（或对域控的策略请求，视架构而定）
+    v_model_stage:
+      - 概念
+  inputs_references:
+    - id: PRD-NOA-001
+      name: NOA 功能需求（导航领航辅助）
+      version: v0.1
+      source: 产品需求文档
+      note: 待提供
+    - id: ODD-NOA-001
+      name: NOA ODD 定义（道路类型/速度/天气/交通规则等）
+      version: v0.1
+      source: 系统需求/法规合规文档
+      note: 待提供
+    - id: SYS-ARCH-001
+      name: 系统架构说明
+      version: v0.4
+      source: 系统架构文档
+      note: 草案
+  standard_requirements:
+    - standard: ISO 26262
+      part_clause: Part 3（Concept Phase）
+      applicability: Item Definition 作为 HARA 输入，需明确功能边界与场景假设
+      evidence_ref: SYS-REV-NOA-ITEM-001（计划）
+  project_assumptions:
+    - id: ASM-NOA-ITEM-001
+      assumption: NOA 的 ODD（Operational Design Domain，运行设计域）由项目明确，并能在运行时被系统识别/约束
+      impact: 场景边界与风险评估
+      risk_if_invalid: ODD 超界导致不可控风险增大
+      verification: ODD 文档评审 + 运行时 ODD 约束机制验证
+    - id: ASM-NOA-ITEM-002
+      assumption: 系统具备可靠的驾驶员接管/告警通路（HMI、方向盘扭矩/踏板等）
+      impact: 可控性（C）假设
+      risk_if_invalid: 驾驶员无法及时接管
+      verification: HMI/接管路径集成测试与用户试验
+    - id: ASM-NOA-ITEM-003
+      assumption: 车道线、前车、限速、匝道/分合流等关键要素的感知与定位能力满足 NOA 最小性能需求
+      impact: 轨迹规划与控制请求安全性
+      risk_if_invalid: 轨迹不合理导致碰撞/越界风险
+      verification: 场景测试集 + 实车/仿真验证（含极端场景）
+  traceability:
+    - item_id: ITM-NOA-001
+      upstream: PRD-NOA-001
+      downstream: HARA-NOA-001（待建）/FSC-NOA-001（待建）
+      verification_method: 评审
+      evidence_id: SYS-REV-NOA-ITEM-001（计划）
+  open_verification_items:
+    - id: OVI-NOA-ITEM-001
+      item: NOA ODD 边界与降级/退出策略是否完整覆盖（道路类型、施工区、恶劣天气等）
+      owner: 待定
+      due: 待定
+      status: Open
+    - id: OVI-NOA-ITEM-002
+      item: 变道功能（若支持）的触发/抑制条件、与周边车交互策略是否一致且可解释
+      owner: 待定
+      due: 待定
+      status: Open
+    - id: OVI-NOA-ITEM-003
+      item: 最小风险状态（MRC/MRM，若适用）与驾驶员接管失败处理策略
+      owner: 待定
+      due: 待定
+      status: Open
+  review_approval:
+    - role: 作者
+      name: 系统安全工程师（待定）
+      conclusion: N/A
+      date: 2026-03-27
+    - role: 评审者
+      name: 系统工程负责人（待定）
+      conclusion: 待填写
+      date: 待填写
+    - role: 批准者
+      name: 功能安全经理（待定）
+      conclusion: 待填写
+      date: 待填写
+  change_history:
+    - version: v0.1
+      date: 2026-03-27
+      summary: 创建 NOA Item Definition 草案
+      reason: 概念阶段初始化
+      author: AI Assistant
+  notes_boundary:
+    - 本文档为 Item Definition 草案，不构成 ASIL 等级最终结论。
+    - ASIL 定级需在 HARA 中按具体 ODD 场景完成 S/E/C 评估。
+    - 若风险来自“无故障但性能不足/误用”情形，应补充 ISO 21448（SOTIF）并与 ISO 26262 结论分开记录。
+
+content:
+  item_overview:
+    item_name: NOA（导航辅助驾驶/领航辅助）
+    functional_objective: 在限定 ODD 内，根据导航路线与环境感知输出纵向/横向辅助驾驶控制请求（或轨迹目标），并在边界条件触发时提示驾驶员接管或执行安全降级/退出。
+    non_safety_objectives:
+      - 提升路线跟随与车道保持舒适性
+      - 减少不必要的告警与突兀控制
+      - 提升通行效率（在合规前提下）
+  boundary_interfaces:
+    in_scope:
+      - 导航路线与道路拓扑利用（地图/定位输入）
+      - 环境感知融合后的车道/目标/限速等要素使用
+      - 轨迹/速度规划（或策略请求）与 NOA 状态机
+      - 退出/降级/接管提示逻辑
+      - 向执行/底盘控制或域控输出控制请求/轨迹目标/状态
+    out_of_scope:
+      - 低层执行控制闭环（转向/制动/动力执行器具体控制算法，若由底盘域负责）
+      - 驾驶员身份识别与舒适性娱乐功能
+      - 远程云控驾驶行为
+    interfaces:
+      - id: IF-NOA-001
+        object: 导航/地图/定位模块
+        direction: 输入
+        signal: 路线、道路拓扑、定位质量、限速/匝道信息（如适用）
+        normal_range: 定位与地图匹配质量满足 NOA 最小要求
+        abnormal_handling: 定位/地图质量不足时抑制 NOA 或降级
+      - id: IF-NOA-002
+        object: 感知系统（摄像头/雷达/激光雷达等，按项目）
+        direction: 输入
+        signal: 车道线/边界、目标车辆/障碍物、交通标志/限速（如适用）
+        normal_range: 输出周期与置信度满足规划需求
+        abnormal_handling: 置信度不足时限制功能并提示驾驶员接管
+      - id: IF-NOA-003
+        object: 车辆状态总线（CAN/Ethernet）
+        direction: 输入
+        signal: 车速、加速度、转角、档位、制动状态、转向灯、雨刮等
+        normal_range: 信号有效且时延满足控制链路
+        abnormal_handling: 关键状态信号失效触发降级/退出
+      - id: IF-NOA-004
+        object: 执行/底盘控制或域控
+        direction: 输出
+        signal: 轨迹目标/加速度目标/车道变更请求/功能状态与有效位
+        normal_range: 下游确认接收并执行，反馈闭环（如有）
+        abnormal_handling: 通信超时或拒绝执行时进入安全降级并告警
+      - id: IF-NOA-005
+        object: HMI
+        direction: 输出
+        signal: 激活/可用/退出/接管告警、原因码、等级
+        normal_range: 告警通路可用且优先级正确
+        abnormal_handling: HMI 不可用时禁止激活或强制退出
+  operating_scenarios:
+    - id: SCN-NOA-001
+      description: 高速主路巡航与车道保持
+      conditions: 高速道路，良好天气，车道线清晰，速度 60-120 km/h（以 ODD 为准）
+      driver_state: 正常驾驶，可随时接管
+      note: 基线场景
+    - id: SCN-NOA-002
+      description: 匝道分合流与道路拓扑变化
+      conditions: 高速匝道/分流口，交通流变化
+      driver_state: 注意力可能分散，需要提示关注
+      note: 关键场景
+    - id: SCN-NOA-003
+      description: 施工区/临时标线导致车道边界不稳定
+      conditions: 施工区、锥桶、临时标线，车道线不清晰
+      driver_state: 需要及时接管
+      note: ODD 边界/降级触发场景
+    - id: SCN-NOA-004
+      description: 低能见度（雨雾夜间）感知能力下降
+      conditions: 大雨/雾/夜间逆光，感知置信度下降
+      driver_state: 需要及时接管
+      note: 降级/退出策略关键场景
+  dependencies_constraints:
+    - id: DEP-NOA-001
+      dependency: ODD 识别与约束机制
+      constraint: 能识别道路类型/天气/速度等关键边界并限制激活
+      impact_if_failed: ODD 超界导致风险不可控
+    - id: DEP-NOA-002
+      dependency: 驾驶员告警与接管链路
+      constraint: 告警可达且可理解，接管检测可靠
+      impact_if_failed: 可控性下降，接管失败
+    - id: DEP-NOA-003
+      dependency: 感知与定位性能
+      constraint: 关键要素检测率/误检率/时延满足最小性能
+      impact_if_failed: 轨迹规划偏差、碰撞风险上升
+    - id: DEP-NOA-004
+      dependency: 车辆执行系统接口
+      constraint: 输出请求的时序/有效位/拒绝原因反馈明确
+      impact_if_failed: 失配导致突兀控制或无法安全退出
+  known_failures_initial_concerns:
+    - id: CON-NOA-001
+      concern: 规划输出异常导致车辆偏离车道或与目标车碰撞
+      source: 经验/评审
+      severity_preliminary: 待定
+      downstream: 输入 HARA 危害事件
+    - id: CON-NOA-002
+      concern: 应退出/降级但未退出，驾驶员未及时接管
+      source: 评审
+      severity_preliminary: 待定
+      downstream: 输入 HARA（可控性假设）
+    - id: CON-NOA-003
+      concern: 误退出/误告警导致驾驶员困惑或误操作
+      source: 人机评审
+      severity_preliminary: 待定
+      downstream: 输入 HARA 与 SOTIF 补充

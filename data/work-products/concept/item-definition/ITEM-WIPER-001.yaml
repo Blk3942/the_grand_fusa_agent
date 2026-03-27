@@ -1,0 +1,188 @@
+meta:
+  doc_id: ITEM-WIPER-001
+  title: 雨刮器系统（Wiper System）Item Definition（相关项定义）
+  work_product_type: item-definition
+  iso_ref:
+    - ISO 26262-3
+  asil: 待定
+  status: Draft
+  owner: 系统安全团队（待定）
+  reviewers: []
+  version: v0.1
+  baseline: 未基线
+  last_updated: 2026-03-27
+
+base:
+  purpose: 定义雨刮器系统在项目中的功能边界、外部接口、运行场景与约束，作为后续 HARA 与 FSC 的上游输入。
+  scope_boundary:
+    system_function_boundary:
+      - 提供前风挡雨刮（可选：后风挡雨刮）控制，包括手动挡位、自动雨量感应（若配备）、间歇/连续/高速模式
+      - 涵盖雨刮控制逻辑、驱动请求输出与故障/降级策略（不含电机/机械结构设计细节）
+    v_model_stage:
+      - 概念
+  inputs_references:
+    - id: PRD-WIPER-001
+      name: 雨刮器功能需求
+      version: v0.1
+      source: 产品需求文档
+      note: 待提供
+    - id: IF-SPEC-WIPER-001
+      name: 雨刮器对外接口说明
+      version: v0.1
+      source: 系统接口规范
+      note: 待提供
+    - id: SYS-ARCH-001
+      name: 系统架构说明
+      version: v0.4
+      source: 系统架构文档
+      note: 草案
+  standard_requirements:
+    - standard: ISO 26262
+      part_clause: Part 3（Concept Phase）
+      applicability: Item Definition 作为 HARA 输入，需明确功能边界、场景假设与接口
+      evidence_ref: SYS-REV-WIPER-ITEM-001（计划）
+  project_assumptions:
+    - id: ASM-WIPER-ITEM-001
+      assumption: 雨刮器由车身控制器（BCM）/域控控制，并具备驱动电机的状态反馈（如过流/堵转/欠压）
+      impact: 故障检测与降级策略
+      risk_if_invalid: 故障不可检测导致视野受影响
+      verification: 接口联调 + 故障注入测试（计划）
+    - id: ASM-WIPER-ITEM-002
+      assumption: 驾驶员可通过开关/触控执行雨刮控制，并能在失效时采取手动补救（如停车擦拭）
+      impact: 可控性 C 判定（部分场景）
+      risk_if_invalid: 可控性被高估，ASIL 低估
+      verification: HMI 评审 + 用户试验/评估（计划）
+    - id: ASM-WIPER-ITEM-003
+      assumption: 若配备雨量传感器，其输出包含有效位/置信度，且在失效时能被系统识别
+      impact: 自动雨刮触发可靠性
+      risk_if_invalid: 自动雨刮误触发/不触发导致视野风险
+      verification: 传感器链路验证（计划）
+  traceability:
+    - item_id: ITM-WIPER-001
+      upstream: PRD-WIPER-001
+      downstream: HARA-WIPER-001（待建）/FSC-WIPER-001（待建）
+      verification_method: 评审
+      evidence_id: SYS-REV-WIPER-ITEM-001（计划）
+  open_verification_items:
+    - id: OVI-WIPER-ITEM-001
+      item: 自动雨刮（若配备）在小雨/雾/飞溅等边界工况下的触发策略与误触发抑制
+      owner: 待定
+      due: 待定
+      status: Open
+    - id: OVI-WIPER-ITEM-002
+      item: 雨刮失效（停止/低速）对驾驶视野与事故风险的场景边界（高速/夜间/重雨）
+      owner: 待定
+      due: 待定
+      status: Open
+  review_approval:
+    - role: 作者
+      name: 系统安全工程师（待定）
+      conclusion: N/A
+      date: 2026-03-27
+    - role: 评审者
+      name: 系统工程负责人（待定）
+      conclusion: 待填写
+      date: 待填写
+    - role: 批准者
+      name: 功能安全经理（待定）
+      conclusion: 待填写
+      date: 待填写
+  change_history:
+    - version: v0.1
+      date: 2026-03-27
+      summary: 创建雨刮器系统 Item Definition 草案
+      reason: 概念阶段初始化
+      author: AI Assistant
+  notes_boundary:
+    - 本文档为 Item Definition 草案，不构成 ASIL 等级最终结论。
+    - ASIL 定级需在 HARA 中按场景完成 S/E/C 评估并基于项目数据冻结。
+    - 对“无故障但性能不足/误用”引发的风险（例如雨量传感器性能边界）可在 ISO 21448（SOTIF）中补充并与 ISO 26262 分开记录。
+
+content:
+  item_overview:
+    item_name: 雨刮器系统（Wiper System）
+    functional_objective: 在雨/雪/飞溅等影响风挡透明度的情况下，通过雨刮控制提升驾驶员视野；支持手动控制与可选自动控制，并在故障时提供可用的降级/提示策略。
+    non_safety_objectives:
+      - 提升自动雨刮舒适性与可接受性（避免频繁抖动/误触发）
+      - 降低噪声与电机负载，提升寿命
+  boundary_interfaces:
+    in_scope:
+      - 雨刮模式控制（OFF/间歇/低速/高速/单次刮拭）
+      - 自动雨刮控制（若配备雨量传感器）
+      - 对雨刮电机/驱动输出控制请求（占空比/速度档位等，按架构）
+      - 故障检测（堵转、过流、欠压、通信异常）与降级策略（限速/停止/提示）
+    out_of_scope:
+      - 雨刮臂/刮片机械结构设计
+      - 玻璃加热除霜策略（若有则另行界定）
+    interfaces:
+      - id: IF-WIPER-001
+        object: 组合开关/雨刮控制输入（柱开关/触控）
+        direction: 输入
+        signal: 模式选择、间歇档位、单次刮拭指令
+        normal_range: 输入信号有效且去抖满足规格
+        abnormal_handling: 输入异常时保持当前状态或进入安全降级（待定）
+      - id: IF-WIPER-002
+        object: 雨量传感器（可选）
+        direction: 输入
+        signal: 雨量等级、有效位/置信度
+        normal_range: 输出周期与有效位满足自动控制需求
+        abnormal_handling: 传感器无效时退出自动模式并提示（待定）
+      - id: IF-WIPER-003
+        object: 车辆状态总线（CAN/Ethernet）
+        direction: 输入
+        signal: 车速、点火状态、雨刮系统诊断信息、供电状态
+        normal_range: 信号周期与质量位有效
+        abnormal_handling: 关键状态丢失时进入保守策略（待定）
+      - id: IF-WIPER-004
+        object: 雨刮电机/驱动模块（BCM/驱动器）
+        direction: 输出
+        signal: 速度档位/控制请求、使能/禁用
+        normal_range: 执行并反馈状态（如过流/堵转）
+        abnormal_handling: 执行异常时降级并提示（待定）
+      - id: IF-WIPER-005
+        object: HMI/仪表
+        direction: 输出
+        signal: 自动模式指示、故障提示、降级提示
+        normal_range: 告警通路可用且优先级正确
+        abnormal_handling: HMI 不可用时按项目定义处理（待定）
+  operating_scenarios:
+    - id: SCN-WIPER-001
+      description: 小雨/飞溅，手动间歇雨刮
+      conditions: 城市道路，低中车速，轻度降雨或溅水
+      driver_state: 正常驾驶
+      note: 基线场景
+    - id: SCN-WIPER-002
+      description: 大雨高速行驶，雨刮高速模式
+      conditions: 高速道路，80-120 km/h，强降雨
+      driver_state: 需要持续视野
+      note: 关键安全场景
+    - id: SCN-WIPER-003
+      description: 夜间大雨或对向车灯反射，视野需求更高
+      conditions: 夜间，强降雨，眩光
+      driver_state: 视野受限风险上升
+      note: 严重度可能更高
+    - id: SCN-WIPER-004
+      description: 自动雨刮边界工况（雾、毛毛雨、泥水飞溅）
+      conditions: 能见度变化快，雨量传感器易误判
+      driver_state: 可能频繁调整
+      note: 与 SOTIF 边界相关
+  dependencies_constraints:
+    - id: DEP-WIPER-001
+      dependency: 供电与驱动能力
+      constraint: 欠压/低温下仍能满足最低刮拭能力或触发降级提示
+      impact_if_failed: 雨刮停止导致视野受影响
+    - id: DEP-WIPER-002
+      dependency: 驾驶员输入与 HMI 提示
+      constraint: 控制输入可靠，故障提示明确可理解
+      impact_if_failed: 驾驶员无法及时采取补救措施
+  known_failures_initial_concerns:
+    - id: CON-WIPER-001
+      concern: 雨刮在大雨高速工况停止/速度不足导致视野严重受限
+      source: 评审/经验
+      severity_preliminary: 待定
+      downstream: 输入 HARA 危害事件
+    - id: CON-WIPER-002
+      concern: 自动雨刮误触发或不触发导致驾驶员分心或视野不足（边界与 SOTIF 相关）
+      source: 评审
+      severity_preliminary: 待定
+      downstream: 输入 HARA / SOTIF

@@ -1,0 +1,164 @@
+meta:
+  doc_id: HARA-NOA-001
+  title: NOA（导航辅助驾驶/领航辅助）HARA（危害分析与风险评估）
+  work_product_type: hara
+  iso_ref:
+    - ISO 26262-3
+  asil: 待定
+  status: Draft
+  owner: 系统安全团队（待定）
+  reviewers: []
+  version: v0.1
+  baseline: 未基线
+  last_updated: 2026-03-27
+
+base:
+  purpose: 基于 NOA Item Definition，在概念阶段识别危害事件并进行风险评估（S/E/C），提出安全目标（SG）并形成向 FSC 的追溯输入。
+  scope_boundary:
+    system_function_boundary:
+      - 覆盖 NOA 在其 ODD 内的典型运行场景与边界场景
+      - 覆盖失效引发的危害事件（malfunction-based）
+    v_model_stage:
+      - 概念
+  inputs_references:
+    - id: ITEM-NOA-001
+      name: NOA Item Definition
+      version: v0.1
+      source: data/work-products/concept/item-definition/ITEM-NOA-001.yaml
+      note: 单一真源
+    - id: ODD-NOA-001
+      name: NOA ODD 定义
+      version: v0.1
+      source: 系统需求/法规合规文档
+      note: 待提供（影响 E/C 假设）
+  standard_requirements:
+    - standard: ISO 26262
+      part_clause: Part 3（HARA）
+      applicability: 危害识别、场景、危害事件、S/E/C 与安全目标
+      evidence_ref: SYS-REV-NOA-HARA-001（计划）
+  project_assumptions:
+    - id: ASM-NOA-HARA-001
+      assumption: 驾驶员在 NOA 激活期间保持“监督驾驶”并可在告警后合理时间接管（具体时间待定）
+      impact: 可控性 C 的判定
+      risk_if_invalid: C 低估导致 ASIL 低估
+      verification: 驾驶员研究/试验数据与 HMI 设计确认
+  traceability:
+    - item_id: HARA-NOA-001
+      upstream: ITEM-NOA-001
+      downstream: FSC-NOA-001（待建）
+      verification_method: 评审
+      evidence_id: SYS-REV-NOA-HARA-001（计划）
+  open_verification_items:
+    - id: OVI-NOA-HARA-001
+      item: S/E/C 标定所需的 ODD 场景统计与驾驶员可控性数据
+      owner: 待定
+      due: 待定
+      status: Open
+  review_approval:
+    - role: 作者
+      name: 系统安全工程师（待定）
+      conclusion: N/A
+      date: 2026-03-27
+    - role: 评审者
+      name: 功能安全工程师（待定）
+      conclusion: 待填写
+      date: 待填写
+    - role: 批准者
+      name: 功能安全经理（待定）
+      conclusion: 待填写
+      date: 待填写
+  change_history:
+    - version: v0.1
+      date: 2026-03-27
+      summary: 创建 NOA HARA 草案
+      reason: 概念阶段初始化
+      author: AI Assistant
+  notes_boundary:
+    - 本 HARA 为草案：S/E/C 与 ASIL 定级高度依赖 ODD 与驾驶员可控性假设，需项目数据验证后冻结。
+
+content:
+  analysis_scope:
+    related_item: ITEM-NOA-001
+    included_boundary:
+      - NOA 激活/可用/退出逻辑与对执行层输出
+      - 变道相关（若支持）与分合流场景
+    excluded_boundary:
+      - 执行层底盘闭环控制算法细节
+      - 非 malfunction 的性能不足风险（SOTIF 另行分析）
+  hazards_and_events:
+    - he_id: HE-NOA-001
+      scenario: 高速主路巡航，车道线清晰，前方有慢车
+      malfunction: NOA 目标识别错误导致未减速/未跟车
+      hazard_event: 与前车追尾碰撞
+      consequence: 乘员伤害与多车事故风险
+    - he_id: HE-NOA-002
+      scenario: 匝道分流口，车道拓扑变化
+      malfunction: 规划输出错误导致车辆驶入错误车道或越界
+      hazard_event: 车辆越界与侧向碰撞/撞护栏
+      consequence: 乘员伤害与二次事故风险
+    - he_id: HE-NOA-003
+      scenario: 施工区，临时标线不清晰
+      malfunction: 应退出/降级但未退出，持续输出控制请求
+      hazard_event: 车辆偏离可行驶区域，碰撞锥桶/施工车辆/护栏
+      consequence: 伤害风险与道路阻塞
+    - he_id: HE-NOA-004
+      scenario: 大雨夜间，感知置信度下降
+      malfunction: 误判车道边界导致横向控制异常
+      hazard_event: 车辆偏离车道并与相邻车辆擦碰
+      consequence: 伤害风险与失控风险
+  risk_assessment:
+    - he_id: HE-NOA-001
+      s: 待定
+      e: 待定
+      c: 待定
+      asil: 待定
+      rationale: 需结合 ODD 暴露度统计与驾驶员接管时间假设确定
+    - he_id: HE-NOA-002
+      s: 待定
+      e: 待定
+      c: 待定
+      asil: 待定
+      rationale: 需结合分流口场景频率与 HMI 提示策略确定
+    - he_id: HE-NOA-003
+      s: 待定
+      e: 待定
+      c: 待定
+      asil: 待定
+      rationale: 施工区属于关键边界场景，需验证降级/退出可靠性
+    - he_id: HE-NOA-004
+      s: 待定
+      e: 待定
+      c: 待定
+      asil: 待定
+      rationale: 低能见度影响感知，需定义最小性能与退出策略
+  safety_goals:
+    - sg_id: SG-NOA-001
+      description: 在 NOA 激活期间，系统应避免因纵向控制失效导致的追尾碰撞，并在能力不足时及时退出/告警。
+      source_he_id: HE-NOA-001
+      asil: 待定
+      safe_state: 退出 NOA 并提示驾驶员接管（必要时进入受限辅助或最小风险策略，待定）
+    - sg_id: SG-NOA-002
+      description: 在道路拓扑变化与分合流场景中，系统应避免输出导致越界/驶入错误车道的控制请求，并提供可控退出。
+      source_he_id: HE-NOA-002
+      asil: 待定
+      safe_state: 退出 NOA 并保持车辆在当前车道可控行驶（待定）
+    - sg_id: SG-NOA-003
+      description: 在施工区或车道边界不可信场景下，系统应检测能力不足并及时抑制/退出 NOA，避免偏离可行驶区域。
+      source_he_id: HE-NOA-003
+      asil: 待定
+      safe_state: 退出 NOA + 明确接管告警
+  assumptions_limits:
+    - type: 假设
+      id: ASM-NOA-HARA-001
+      content: 驾驶员在告警后可在合理时间接管
+      impact: 影响可控性 C 的判定
+    - type: 限制
+      id: LIM-NOA-HARA-001
+      content: HARA 仅覆盖 malfunction 引发的危害事件；SOTIF 风险另行分析
+      impact: 需单独建立 SOTIF 工作成果
+  downstream_allocation:
+    - sg_id: SG-NOA-001
+      allocation: FSC/FSR（待建）
+      receiver: FSC-NOA-001
+      verification_method: 分析/评审/测试
+      evidence_id: 待定

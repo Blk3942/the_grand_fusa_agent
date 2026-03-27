@@ -1,0 +1,107 @@
+template_type: base-word
+version: v0.1
+frontmatter_mapping:
+  doc_id: meta.doc_id
+  title: meta.title
+  work_product_type: meta.work_product_type
+  iso_ref: meta.iso_ref
+  asil: meta.asil
+  status: meta.status
+  owner: meta.owner
+  reviewers: meta.reviewers
+  version: meta.version
+  baseline: meta.baseline
+  last_updated: meta.last_updated
+sections:
+- heading: Change History（变更历史）
+  blocks:
+  - subheading: Document Change History（文档履历）
+    table:
+      columns:
+      - Version
+      - Status
+      - Author
+      - Date
+      - Approver
+      - Approve Date
+      - Description
+      source: base.change_history_document
+      mapping:
+        Version: version
+        Status: status
+        Author: author
+        Date: date
+        Approver: approver
+        Approve Date: approve_date
+        Description: description
+  - subheading: Template Change History（文档模板履历）
+    table:
+      columns:
+      - Version
+      - Status
+      - Author
+      - Date
+      - Approver
+      - Approve Date
+      - Description
+      source: base.change_history_template
+      mapping:
+        Version: version
+        Status: status
+        Author: author
+        Date: date
+        Approver: approver
+        Approve Date: approve_date
+        Description: description
+- heading: 1. General Information（一般信息）
+  blocks:
+  - subheading: 1.1 Document Purpose（文档目的）
+    source: base.purpose
+  - subheading: 1.2 Document Scope（文档范围）
+    source: base.document_scope
+- heading: 1.3 Input Document（输入文档）
+  table:
+    columns:
+    - Document No.
+    - File name
+    - Version
+    source: base.input_documents
+    mapping:
+      Document No.: document_no
+      File name: file_name
+      Version: version
+- heading: 1.4 References（参考文档）
+  table:
+    columns:
+    - Document No.
+    - File name
+    - Version
+    source: base.references
+    mapping:
+      Document No.: document_no
+      File name: file_name
+      Version: version
+- heading: 2. Terms and Abbreviations（术语与缩略语）
+  blocks:
+  - subheading: 2.1 Terms（术语）
+    table:
+      columns:
+      - Term
+      - Definition
+      - Source
+      source: base.terms
+      mapping:
+        Term: term
+        Definition: definition
+        Source: source
+  - subheading: 2.2 Abbreviations（缩略语）
+    table:
+      columns:
+      - Term
+      - Definition
+      source: base.abbreviations
+      mapping:
+        Term: term
+        Definition: definition
+- heading: 正文内容（Main Content）
+  content_placeholder: true

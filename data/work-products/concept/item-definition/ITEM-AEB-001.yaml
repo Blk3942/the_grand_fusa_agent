@@ -1,0 +1,203 @@
+meta:
+  doc_id: ITEM-AEB-001
+  title: AEB（自动紧急制动）Item Definition（相关项定义）
+  work_product_type: item-definition
+  iso_ref:
+    - ISO 26262-3
+  asil: 待定
+  status: Draft
+  owner: 系统安全团队（待定）
+  reviewers: []
+  version: v0.1
+  baseline: 未基线
+  last_updated: 2026-03-27
+
+base:
+  purpose: 定义 AEB（Automatic Emergency Braking，自动紧急制动）功能在项目中的功能边界、外部接口、运行场景与约束，作为后续 HARA 与 FSC 的上游输入。
+  scope_boundary:
+    system_function_boundary:
+      - 在限定 ODD/工况下，对前向碰撞风险进行评估，并在满足触发条件时自动请求制动以避免/减轻碰撞
+      - 涵盖 AEB 的激活/保持/退出逻辑、目标选择与触发逻辑、对制动系统的制动请求输出（不含制动执行闭环细节）
+    v_model_stage:
+      - 概念
+  inputs_references:
+    - id: PRD-AEB-001
+      name: AEB 功能需求
+      version: v0.1
+      source: 产品需求文档
+      note: 待提供
+    - id: ODD-AEB-001
+      name: AEB ODD/适用工况定义（目标类型、速度范围、道路类型等）
+      version: v0.1
+      source: 系统需求/法规合规文档
+      note: 待提供
+    - id: SYS-ARCH-001
+      name: 系统架构说明
+      version: v0.4
+      source: 系统架构文档
+      note: 草案
+    - id: IF-SPEC-AEB-001
+      name: AEB 对外接口说明
+      version: v0.1
+      source: 系统接口规范
+      note: 待提供
+  standard_requirements:
+    - standard: ISO 26262
+      part_clause: Part 3（Concept Phase）
+      applicability: Item Definition 作为 HARA 输入，需明确 AEB 触发边界、接口与场景假设
+      evidence_ref: SYS-REV-AEB-ITEM-001（计划）
+  project_assumptions:
+    - id: ASM-AEB-ITEM-001
+      assumption: 系统具备可靠的前向目标探测能力（车辆/行人/两轮车等覆盖范围按项目定义）并提供置信度/有效位
+      impact: 碰撞风险评估与触发准确性
+      risk_if_invalid: 漏检导致未触发；误检导致误触发
+      verification: 场景测试集 + 实车/仿真验证（含极端与边界场景）
+    - id: ASM-AEB-ITEM-002
+      assumption: 制动系统可接收 AEB 制动请求并在指定时间内建立足够制动减速度，同时能反馈可用性/限制信息（如故障、降级）
+      impact: 触发后碰撞缓解能力
+      risk_if_invalid: 制动不足导致碰撞不可避免或减轻不足
+      verification: 接口联调 + 制动建立时间/减速度性能验证
+    - id: ASM-AEB-ITEM-003
+      assumption: HMI 可提供 AEB 相关告警/提示（如前向碰撞预警 FCW、AEB 激活提示），且驾驶员操作（踏板/方向盘）可被系统可靠识别以进行抑制/退出
+      impact: 可控性与误触发处理
+      risk_if_invalid: 驾驶员无法理解/介入，或误触发无法抑制
+      verification: HMI 联调 + 用户试验/评审
+  traceability:
+    - item_id: ITM-AEB-001
+      upstream: PRD-AEB-001
+      downstream: HARA-AEB-001（待建）/FSC-AEB-001（待建）
+      verification_method: 评审
+      evidence_id: SYS-REV-AEB-ITEM-001（计划）
+  open_verification_items:
+    - id: OVI-AEB-ITEM-001
+      item: 不同目标类型（车/人/两轮车）与不同相对速度条件下触发边界与减速度策略
+      owner: 待定
+      due: 待定
+      status: Open
+    - id: OVI-AEB-ITEM-002
+      item: 低附着（雨雪冰）与坡道/弯道场景下的误触发抑制与碰撞缓解能力边界
+      owner: 待定
+      due: 待定
+      status: Open
+    - id: OVI-AEB-ITEM-003
+      item: 误触发时的驾驶员可控性（踏板/转向介入）与系统退出策略
+      owner: 待定
+      due: 待定
+      status: Open
+  review_approval:
+    - role: 作者
+      name: 系统安全工程师（待定）
+      conclusion: N/A
+      date: 2026-03-27
+    - role: 评审者
+      name: 系统工程负责人（待定）
+      conclusion: 待填写
+      date: 待填写
+    - role: 批准者
+      name: 功能安全经理（待定）
+      conclusion: 待填写
+      date: 待填写
+  change_history:
+    - version: v0.1
+      date: 2026-03-27
+      summary: 创建 AEB Item Definition 草案
+      reason: 概念阶段初始化
+      author: AI Assistant
+  notes_boundary:
+    - 本文档为 Item Definition 草案，不构成 ASIL 等级最终结论。
+    - ASIL 定级需在 HARA 中按场景完成 S/E/C 评估并基于项目数据冻结。
+    - 若风险来自“无故障但性能不足/误用”，应另行开展 ISO 21448（SOTIF）分析并与 ISO 26262 结论分开记录。
+
+content:
+  item_overview:
+    item_name: AEB（Automatic Emergency Braking，自动紧急制动）
+    functional_objective: 在限定工况下评估前向碰撞风险，并在满足触发条件时自动请求制动以避免或减轻与前方目标的碰撞；在系统能力不足或驾驶员介入时执行抑制/退出并提示驾驶员。
+    non_safety_objectives:
+      - 降低误触发率并提高驾驶员接受度
+      - 在保证安全的前提下减少不必要的强制制动
+      - 提升复杂场景（弯道、坡道、低附着）下的稳定性
+  boundary_interfaces:
+    in_scope:
+      - AEB 激活/可用/退出状态机与触发条件判定
+      - 前向目标与碰撞风险评估（TTC 等指标使用，具体算法按项目）
+      - 制动请求输出（减速度目标/制动压力请求/制动等级等，按架构）
+      - 误触发抑制与驾驶员介入检测（踏板、方向盘等）
+      - 与 FCW（Forward Collision Warning，前向碰撞预警）协同（若属于同一功能簇）
+    out_of_scope:
+      - 制动执行闭环控制算法细节（由制动/底盘控制器实现）
+      - 横向避让策略（如自动转向避障，若有则另行界定）
+    interfaces:
+      - id: IF-AEB-001
+        object: 感知系统（雷达/摄像头/融合，按项目）
+        direction: 输入
+        signal: 前向目标列表（距离/相对速度/类别/置信度/ID）、目标有效位
+        normal_range: 周期与时延满足触发判定需求，置信度满足最小要求
+        abnormal_handling: 置信度不足时抑制触发并提示功能不可用/降级
+      - id: IF-AEB-002
+        object: 车辆状态总线（CAN/Ethernet）
+        direction: 输入
+        signal: 车速、纵向加速度、制动踏板/油门踏板、方向盘角度/扭矩、ESC/ABS 状态
+        normal_range: 信号有效且周期满足触发判定与抑制逻辑
+        abnormal_handling: 关键状态失效触发退出/禁止触发并上报故障
+      - id: IF-AEB-003
+        object: 制动/底盘控制器或域控
+        direction: 输出
+        signal: AEB 制动请求（等级/减速度目标/有效位）、释放/退出请求（如适用）、执行状态反馈
+        normal_range: 下游确认接收并在规定时间内建立制动，反馈可用性与限制原因
+        abnormal_handling: 通信超时/拒绝执行时触发故障上报并提示驾驶员（碰撞缓解能力下降）
+      - id: IF-AEB-004
+        object: HMI
+        direction: 输出
+        signal: 功能可用/激活/触发提示、告警等级、原因码
+        normal_range: 告警通路可用且优先级正确
+        abnormal_handling: HMI 不可用时限制功能或提升保守策略（按项目）
+  operating_scenarios:
+    - id: SCN-AEB-001
+      description: 城市道路前车急刹导致碰撞风险上升
+      conditions: 10-60 km/h，城市道路，交通流变化
+      driver_state: 正常驾驶，可能反应延迟
+      note: 基线场景
+    - id: SCN-AEB-002
+      description: 高速跟车遇前车骤停/切入
+      conditions: 60-120 km/h，高速道路，切入车辆
+      driver_state: 需要及时介入，反应时间关键
+      note: 高严重度场景
+    - id: SCN-AEB-003
+      description: 行人横穿/自行车切入（若支持 VRU）
+      conditions: 城市道路，夜间/逆光等复杂光照
+      driver_state: 可能未及时注意到目标
+      note: 目标类型覆盖需项目确认
+    - id: SCN-AEB-004
+      description: 弯道/坡道/低附着导致目标识别与制动能力边界变化
+      conditions: 弯道/坡道，雨雪冰等低附着
+      driver_state: 需要及时接管或调整车速
+      note: 误触发抑制与减速度策略关键场景
+  dependencies_constraints:
+    - id: DEP-AEB-001
+      dependency: 前向目标检测与分类
+      constraint: 在最小距离范围内可检测关键目标并提供置信度
+      impact_if_failed: 漏检导致未触发；误检导致误触发
+    - id: DEP-AEB-002
+      dependency: 制动系统可用性与性能
+      constraint: 制动建立时间与最大减速度满足最小碰撞缓解需求
+      impact_if_failed: 碰撞不可避免或减轻不足
+    - id: DEP-AEB-003
+      dependency: 驾驶员介入检测与退出策略
+      constraint: 能可靠检测踏板/转向介入并按策略抑制/退出
+      impact_if_failed: 误触发无法抑制或退出不及时
+  known_failures_initial_concerns:
+    - id: CON-AEB-001
+      concern: 碰撞风险被低估导致未触发或触发过晚，无法避免/减轻碰撞
+      source: 经验/评审
+      severity_preliminary: 待定
+      downstream: 输入 HARA 危害事件
+    - id: CON-AEB-002
+      concern: 误触发强制制动导致被追尾或驾驶员失控风险
+      source: 评审
+      severity_preliminary: 待定
+      downstream: 输入 HARA 危害事件与可控性分析
+    - id: CON-AEB-003
+      concern: 触发后制动请求未被执行或执行不足（接口/故障/限制）
+      source: 接口评审
+      severity_preliminary: 待定
+      downstream: 输入 HARA（安全目标与诊断机制）

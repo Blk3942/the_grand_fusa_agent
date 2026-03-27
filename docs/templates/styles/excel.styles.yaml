@@ -1,0 +1,63 @@
+version: v0.1
+
+workbook:
+  default_font:
+    name: Microsoft YaHei
+    size: 11
+    bold: false
+  default_alignment:
+    horizontal: left
+    vertical: center
+    wrap_text: true
+  column_auto_fit:
+    enabled: true
+    # 近似按字符数计算列宽（不依赖 Excel 客户端）
+    min_width: 20
+    max_width: 80
+    padding: 10
+
+cover:
+  merge_range: A4:D13
+  font:
+    name: Microsoft YaHei
+    size: 30
+    bold: true
+  alignment:
+    horizontal: center
+    vertical: center
+    wrap_text: true
+  hide_grid_lines: true
+  column_width: 18
+  row_height: 28
+
+table:
+  header:
+    font:
+      name: Microsoft YaHei
+      size: 11
+      bold: true
+    alignment:
+      horizontal: center
+      vertical: center
+      wrap_text: true
+    border:
+      style: thin
+      color: "000000"
+  body:
+    font:
+      name: Microsoft YaHei
+      size: 11
+      bold: false
+    alignment:
+      horizontal: left
+      vertical: center
+      wrap_text: true
+    border:
+      style: thin
+      color: "000000"
+
+  # 可选：表格外框（若启用，会对表格区域四周使用更粗边框）
+  outline:
+    enabled: false
+    style: medium
+    color: "000000"

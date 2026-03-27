@@ -1,0 +1,22 @@
+---
+description: Python 代码风格、配置与密钥管理（The Grand FuSa Agent）
+globs: "**/*.py"
+alwaysApply: false
+---
+
+# Python 约定
+
+## 风格
+
+- 类型标注优先；公共函数写清 docstring（参数、返回值、Raises）。
+- 使用 `pathlib.Path` 处理路径；避免硬编码绝对路径。
+
+## 配置与密钥
+
+- API Key、Base URL 等从环境变量读取（如 `os.environ` / `pydantic-settings`），**禁止**提交真实密钥。
+- 提供 `.env` 时确保已在 `.gitignore` 中排除。
+
+## 与 FuSa 相关代码
+
+- 若实现需求/测试追溯工具，数据结构应能承载 **唯一 ID、版本、来源文档** 字段。
+- 日志中不得写入未脱敏的个人信息或整车机密参数。

@@ -1,0 +1,23 @@
+version: v0.1
+
+# 定义：不同工作成果类型允许/默认输出的文件格式。
+# - allowed_formats: 允许用户选择的输出集合
+# - default_formats: 未指定 --formats 时的默认输出集合
+#
+# 约定格式名：
+# - md   : 可评审版本（Git diff 友好）
+# - docx : Word 交付版本
+# - xlsx : Excel 交付版本
+
+work_product_formats:
+  item-definition:
+    allowed_formats: [md, docx, xlsx]
+    default_formats: [md, docx]
+
+  hara:
+    allowed_formats: [md, xlsx]
+    default_formats: [md, xlsx]
+
+  fsc:
+    allowed_formats: [md, docx, xlsx]
+    default_formats: [md, docx]

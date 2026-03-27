@@ -1,0 +1,216 @@
+meta:
+  doc_id: HARA-DMS-001
+  title: 驾驶员监控系统（DMS）HARA（危害分析与风险评估）
+  work_product_type: hara
+  iso_ref:
+    - ISO 26262-3
+  asil: 待定
+  status: Draft
+  owner: 系统安全团队（待定）
+  reviewers: []
+  version: v0.2
+  baseline: 未基线
+  last_updated: 2026-03-27
+
+base:
+  purpose: 基于 DMS Item Definition，在概念阶段识别危害事件并进行风险评估（S/E/C），提出安全目标（SG）并形成向 FSC 的追溯输入。
+  scope_boundary:
+    system_function_boundary:
+      - 覆盖 DMS 状态估计、告警触发与对下游功能的状态输出
+      - 覆盖 malfunction 引发的危害事件；对“无故障但性能不足/误用”风险在 SOTIF 中补充
+    v_model_stage:
+      - 概念
+  inputs_references:
+    - id: ITEM-DMS-001
+      name: 驾驶员监控系统（DMS）Item Definition
+      version: v0.1
+      source: data/work-products/concept/item-definition/ITEM-DMS-001.yaml
+      note: 单一真源
+    - id: IF-SPEC-DMS-001
+      name: DMS 对外接口说明
+      version: v0.2
+      source: 系统接口规范
+      note: 草案
+  standard_requirements:
+    - standard: ISO 26262
+      part_clause: Part 3（HARA）
+      applicability: 危害识别、场景、危害事件、S/E/C 与安全目标
+      evidence_ref: SYS-REV-DMS-HARA-001（计划）
+  project_assumptions:
+    - id: ASM-DMS-HARA-001
+      assumption: 驾驶员在车辆运行中具备基本接管能力；在告警呈现后可在合理时间内响应（具体时间与策略待定）
+      impact: 可控性 C 判定与告警策略
+      risk_if_invalid: C 低估导致 ASIL 低估；告警策略不充分
+      verification: 驾驶员研究/试验数据 + HMI 评审与验证
+    - id: ASM-DMS-HARA-002
+      assumption: 下游功能（如 L2/L2+ 辅助）对 DMS 状态有效位/失效状态有明确处理策略
+      impact: 危害后果边界（下游误用影响）
+      risk_if_invalid: 下游使用无效状态导致风险扩大
+      verification: 系统接口规范固化 + 集成测试
+  traceability:
+    - item_id: HARA-DMS-001
+      upstream: ITEM-DMS-001
+      downstream: FSC-DMS-001（待建）
+      verification_method: 评审
+      evidence_id: SYS-REV-DMS-HARA-001（计划）
+  open_verification_items:
+    - id: OVI-DMS-HARA-001
+      item: DMS 告警阈值/时序对驾驶员响应与可控性（C）的影响数据
+      owner: 待定
+      due: 待定
+      status: Open
+    - id: OVI-DMS-HARA-002
+      item: DMS 误报导致驾驶员忽视真实告警的行为学影响（与 SOTIF 边界）
+      owner: 待定
+      due: 待定
+      status: Open
+    - id: OVI-DMS-HARA-003
+      item: 下游 ADAS/L2 对 DMS 有效位、不可用状态、超时状态的处理一致性
+      owner: 待定
+      due: 待定
+      status: Open
+  review_approval:
+    - role: 作者
+      name: 系统安全工程师（待定）
+      conclusion: N/A
+      date: 2026-03-27
+    - role: 评审者
+      name: 功能安全工程师（待定）
+      conclusion: 待填写
+      date: 待填写
+    - role: 批准者
+      name: 功能安全经理（待定）
+      conclusion: 待填写
+      date: 待填写
+  change_history:
+    - version: v0.1
+      date: 2026-03-27
+      summary: 创建 DMS HARA 草案
+      reason: 概念阶段初始化
+      author: AI Assistant
+    - version: v0.2
+      date: 2026-03-27
+      summary: 重写 DMS HARA 场景与安全目标映射，强化接口失效与下游误用边界
+      reason: 提升可评审性与后续 FSC 可追溯性
+      author: AI Assistant
+  notes_boundary:
+    - 本 HARA 为草案：S/E/C 与 ASIL 定级依赖场景假设与驾驶员可控性数据，需项目数据验证后冻结。
+
+content:
+  analysis_scope:
+    related_item: ITEM-DMS-001
+    included_boundary:
+      - 驾驶员状态检测（注意力/疲劳/视线偏离等）与告警触发
+      - DMS 状态/风险等级对 HMI 与下游功能的输出
+      - 诊断与降级（如摄像头丢失、置信度不足）概念层面策略
+    excluded_boundary:
+      - 下游 ADAS/自动驾驶策略本体的安全分析细节
+      - 非 malfunction 的性能不足风险（SOTIF 另行分析）
+  hazards_and_events:
+    - he_id: HE-DMS-001
+      scenario: 高速巡航或长时间驾驶，驾驶员疲劳累积
+      malfunction: DMS 漏检疲劳/闭眼/注意力丢失，未触发告警或触发过晚
+      hazard_event: 驾驶员失能未被提醒，车辆在关键时刻无人有效控制
+      consequence: 偏离车道/追尾/碰撞等事故风险上升
+    - he_id: HE-DMS-002
+      scenario: 城市/快速路复杂交通，驾驶员分心（看手机、长时视线偏离）
+      malfunction: DMS 未能识别高风险分心或风险等级低估
+      hazard_event: 驾驶员未及时处理前向风险，导致追尾或对弱势道路使用者反应不足
+      consequence: 伤害风险与财产损失
+    - he_id: HE-DMS-003
+      scenario: 夜间逆光/遮挡场景，摄像头质量下降
+      malfunction: DMS 未检测到输入失效并继续输出“正常/可信”状态
+      hazard_event: 下游功能误用“可信状态”进行策略决策（如延迟接管提示）
+      consequence: 风险扩大（取决于下游策略）
+    - he_id: HE-DMS-004
+      scenario: 驾驶员短时正常行为（查看后视镜、变道观察）被系统误判为高风险
+      malfunction: DMS 频繁误报并触发高等级告警
+      hazard_event: 驾驶员被干扰或对系统告警产生“告警疲劳”，忽视后续真实告警
+      consequence: 可控性下降与二次风险上升（需与 SOTIF 分工）
+    - he_id: HE-DMS-005
+      scenario: 通信异常或系统重启时序不一致
+      malfunction: DMS 状态输出超时/冻结但未显式标记无效
+      hazard_event: 下游继续使用陈旧状态，导致风险评估延迟或接管提示错误
+      consequence: 事故风险上升（依赖下游故障处理）
+  risk_assessment:
+    - he_id: HE-DMS-001
+      s: 待定
+      e: 待定
+      c: 待定
+      asil: 待定
+      rationale: 需结合高速暴露度统计与告警-接管时间假设确定
+    - he_id: HE-DMS-002
+      s: 待定
+      e: 待定
+      c: 待定
+      asil: 待定
+      rationale: 需结合城市场景暴露度与驾驶员可控性数据确定
+    - he_id: HE-DMS-003
+      s: 待定
+      e: 待定
+      c: 待定
+      asil: 待定
+      rationale: 依赖下游误用后果与接口策略，需明确有效位处理
+    - he_id: HE-DMS-004
+      s: 待定
+      e: 待定
+      c: 待定
+      asil: 待定
+      rationale: 与驾驶员行为相关，需澄清 ISO 26262 malfunction 边界与 SOTIF 分工
+    - he_id: HE-DMS-005
+      s: 待定
+      e: 待定
+      c: 待定
+      asil: 待定
+      rationale: 依赖通信超时监测与下游“状态新鲜度”处理机制
+  safety_goals:
+    - sg_id: SG-DMS-001
+      description: 系统应在驾驶员注意力显著丢失/疲劳风险达到阈值时及时触发恰当告警，并在能力不足时输出降级/不可用状态。
+      source_he_id: HE-DMS-001
+      asil: 待定
+      safe_state: 提示驾驶员接管/恢复注意力；必要时向下游输出不可用与风险状态（待定）
+    - sg_id: SG-DMS-002
+      description: 系统应避免在传感器输入失效或置信度不足时输出“正常/可信”状态，应显式输出有效位与降级状态供下游安全处理。
+      source_he_id: HE-DMS-003
+      asil: 待定
+      safe_state: 输出 DMS 不可用/降级状态并提示驾驶员（待定）
+    - sg_id: SG-DMS-003
+      description: 系统应避免持续高频误报造成驾驶员干扰；告警策略应可控且可解释，并在误报风险上升时采取降级策略（边界需与 SOTIF 区分）。
+      source_he_id: HE-DMS-004
+      asil: 待定
+      safe_state: 告警降级/抑制并提示检查系统（待定）
+    - sg_id: SG-DMS-004
+      description: 系统应确保 DMS 状态输出的时效性与有效位完整性；通信超时/重启/冻结时必须显式上报不可用或失效状态。
+      source_he_id: HE-DMS-005
+      asil: 待定
+      safe_state: 输出无效状态并触发下游保守策略与驾驶员提示
+  assumptions_limits:
+    - type: 假设
+      id: ASM-DMS-HARA-001
+      content: 驾驶员在告警后可在合理时间内响应
+      impact: 影响可控性 C 判定与告警时序
+    - type: 限制
+      id: LIM-DMS-HARA-001
+      content: HARA 仅覆盖 malfunction 引发的危害事件；误用/性能不足引发风险在 SOTIF 中补充
+      impact: 需建立对应 SOTIF 工作成果并与安全目标边界对齐
+  downstream_allocation:
+    - sg_id: SG-DMS-001
+      allocation: FSC/FSR（待建）
+      receiver: FSC-DMS-001
+      verification_method: 分析/评审/测试
+      evidence_id: 待定
+    - sg_id: SG-DMS-002
+      allocation: FSC/FSR（待建）
+      receiver: FSC-DMS-001
+      verification_method: 分析/评审/测试
+      evidence_id: 待定
+    - sg_id: SG-DMS-003
+      allocation: FSC/FSR（待建）
+      receiver: FSC-DMS-001
+      verification_method: 分析/评审/测试/驾驶员试验
+      evidence_id: 待定
+    - sg_id: SG-DMS-004
+      allocation: FSC/FSR（待建）
+      receiver: FSC-DMS-001
+      verification_method: 分析/接口一致性测试/故障注入测试
+      evidence_id: 待定

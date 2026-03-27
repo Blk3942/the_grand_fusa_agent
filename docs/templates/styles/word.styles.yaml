@@ -1,0 +1,25 @@
+version: v0.1
+
+# 可选：指定 docx 母版路径（相对仓库根目录）
+docx_template_path: docs/templates/styles/word.master-template.docx
+
+styles:
+  title:
+    font_name: Calibri
+    font_size: 22
+    bold: true
+  normal:
+    font_name: Calibri
+    font_size: 11
+    bold: false
+  heading1:
+    font_name: Calibri
+    font_size: 16
+    bold: true
+  heading2:
+    font_name: Calibri
+    font_size: 13
+    bold: true
+
+table:
+  style_name: Table Grid

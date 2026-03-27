@@ -1,0 +1,211 @@
+meta:
+  doc_id: ITEM-DMS-001
+  title: 驾驶员监控系统（DMS）Item Definition（相关项定义）
+  work_product_type: item-definition
+  iso_ref:
+    - ISO 26262-3
+  asil: 待定
+  status: Draft
+  owner: 系统安全团队（待定）
+  reviewers: []
+  version: v0.1
+  baseline: 未基线
+  last_updated: 2026-03-27
+
+base:
+  purpose: 定义驾驶员监控系统（DMS）在项目中的功能边界、外部接口、运行场景与约束，作为后续 HARA 与 FSC 的上游输入。
+  scope_boundary:
+    system_function_boundary:
+      - 驾驶员状态监测与告警输出（舱内感知、状态机、接口输出）
+      - 不包含自动驾驶策略决策与执行机构控制
+    v_model_stage:
+      - 概念
+  inputs_references:
+    - id: PRD-DMS-001
+      name: 驾驶员状态监测需求
+      version: v0.3
+      source: 产品需求文档
+      note: 草案
+    - id: IF-SPEC-DMS-001
+      name: DMS 对外接口说明
+      version: v0.2
+      source: 系统接口规范
+      note: 草案
+    - id: SYS-ARCH-001
+      name: 系统架构说明
+      version: v0.4
+      source: 系统架构文档
+      note: 草案
+  standard_requirements:
+    - standard: ISO 26262
+      part_clause: Part 3（Concept Phase）
+      applicability: Item Definition 需作为 HARA 输入
+      evidence_ref: SYS-REV-DMS-ITEM-001（计划）
+  project_assumptions:
+    - id: ASM-DMS-ITEM-001
+      assumption: 车辆具备可用的驾驶员面部采集硬件与稳定安装位置
+      impact: 感知输入链路
+      risk_if_invalid: 误检/漏检增加
+      verification: 在样车阶段执行安装一致性检查与标定验证
+    - id: ASM-DMS-ITEM-002
+      assumption: HMI 可支持分级告警呈现且优先级策略可配置
+      impact: 告警呈现链路
+      risk_if_invalid: 驾驶员未接收关键告警
+      verification: 进行 HMI 接口联调与人机评审
+    - id: ASM-DMS-ITEM-003
+      assumption: 下游 ADAS 功能对 DMS 状态有效位有明确处理策略
+      impact: 下游功能联动
+      risk_if_invalid: 下游误用无效状态
+      verification: 在系统接口规范中固化并通过集成测试验证
+  traceability:
+    - item_id: ITM-DMS-001
+      upstream: PRD-DMS-001
+      downstream: HARA-DMS-001（待建）/FSC-DMS-001（待建）
+      verification_method: 评审
+      evidence_id: SYS-REV-DMS-ITEM-001
+  open_verification_items:
+    - id: OVI-DMS-ITEM-001
+      item: 极端光照、遮挡、佩戴口罩/墨镜等条件下检测性能边界
+      owner: 待定
+      due: 待定
+      status: Open
+    - id: OVI-DMS-ITEM-002
+      item: 告警阈值策略对误报/漏报平衡的影响
+      owner: 待定
+      due: 待定
+      status: Open
+    - id: OVI-DMS-ITEM-003
+      item: 通信中断时的降级行为是否满足安全目标分解需求
+      owner: 待定
+      due: 待定
+      status: Open
+  review_approval:
+    - role: 作者
+      name: 系统安全工程师（待定）
+      conclusion: N/A
+      date: 2026-03-27
+    - role: 评审者
+      name: 系统工程负责人（待定）
+      conclusion: 待填写
+      date: 待填写
+    - role: 批准者
+      name: 功能安全经理（待定）
+      conclusion: 待填写
+      date: 待填写
+  change_history:
+    - version: v0.1
+      date: 2026-03-27
+      summary: 创建 DMS Item Definition 草案
+      reason: 概念阶段初始化
+      author: AI Assistant
+  notes_boundary:
+    - 本文档为 Item Definition 草案，不构成 ASIL 等级最终结论。
+    - ASIL（Automotive Safety Integrity Level，汽车安全完整性等级）需在 HARA 完成后按场景进行判定。
+    - 若项目涉及“无故障但性能不足”导致风险的场景，应在后续补充 ISO 21448（SOTIF）分析并与 ISO 26262 结论分开记录。
+
+content:
+  item_overview:
+    item_name: 驾驶员监控系统（Driver Monitoring System, DMS）
+    functional_objective: 在车辆运行过程中监测驾驶员注意力与状态（分心、疲劳、闭眼、视线偏离等），并在满足触发条件时向驾驶员和上层功能提供告警/状态输出。
+    non_safety_objectives:
+      - 降低误报率
+      - 提升告警可接受性
+      - 优化夜间与逆光场景可用性
+  boundary_interfaces:
+    in_scope:
+      - 驾驶员舱内图像采集（红外/可见光摄像头，具体型号待定）
+      - 驾驶员状态估计与分类算法
+      - DMS 状态机与告警触发逻辑
+      - 向 HMI 与车辆域控制器输出状态信号
+    out_of_scope:
+      - 自动驾驶策略决策本体
+      - 制动/转向执行机构控制
+      - 驾驶员身份识别与娱乐功能
+    interfaces:
+      - id: IF-DMS-001
+        object: 驾驶员舱摄像头
+        direction: 输入
+        signal: 图像帧、时间戳、曝光状态
+        normal_range: 帧率与时延满足系统设计值
+        abnormal_handling: 图像丢失时上报降级状态
+      - id: IF-DMS-002
+        object: 车辆状态总线（CAN/Ethernet）
+        direction: 输入
+        signal: 车速、档位、横纵向控制状态
+        normal_range: 信号周期与质量位有效
+        abnormal_handling: 信号失效时进入保守策略
+      - id: IF-DMS-003
+        object: HMI
+        direction: 输出
+        signal: 分级告警请求、文本/图标编码
+        normal_range: 与 HMI 接口协议一致
+        abnormal_handling: HMI 不可用时输出故障状态
+      - id: IF-DMS-004
+        object: ADAS/域控
+        direction: 输出
+        signal: 驾驶员可用性状态、风险等级
+        normal_range: 周期输出且带有效位
+        abnormal_handling: 通信超时时触发故障上报
+  operating_scenarios:
+    - id: SCN-DMS-001
+      description: 城市跟车场景下注意力监控
+      conditions: 0-80 km/h，白天/夜晚，城市道路
+      driver_state: 正常驾驶
+      note: 基线场景
+    - id: SCN-DMS-002
+      description: 高速巡航场景下疲劳监控
+      conditions: 60-120 km/h，高速道路
+      driver_state: 疲劳累积、眨眼频繁
+      note: 重点安全场景
+    - id: SCN-DMS-003
+      description: 夜间逆光/遮挡场景
+      conditions: 夜间、隧道出入口、镜片反光
+      driver_state: 头部偏转或部分遮挡
+      note: 感知鲁棒性边界场景
+    - id: SCN-DMS-004
+      description: 低速拥堵与短时视线转移
+      conditions: 0-30 km/h，拥堵路况
+      driver_state: 临时视线偏离
+      note: 需区分正常行为与风险行为
+  dependencies_constraints:
+    - id: DEP-DMS-001
+      dependency: 摄像头硬件与安装位
+      constraint: 视场角、遮挡率、标定偏差满足规格
+      impact_if_failed: 误检/漏检增加
+    - id: DEP-DMS-002
+      dependency: 计算平台（SoC/MCU）
+      constraint: 算法周期预算满足实时性目标
+      impact_if_failed: 输出滞后导致告警延迟
+    - id: DEP-DMS-003
+      dependency: 车辆网络通信
+      constraint: 总线时延与丢包率在设计范围
+      impact_if_failed: 状态输出中断或陈旧
+    - id: DEP-DMS-004
+      dependency: 电源与唤醒管理
+      constraint: 电压范围、上电时序满足要求
+      impact_if_failed: 模块重启或不可用
+    - id: DEP-DMS-005
+      dependency: HMI 承载能力
+      constraint: 告警呈现策略与优先级一致
+      impact_if_failed: 告警未显示或误导驾驶员
+  known_failures_initial_concerns:
+    - id: CON-DMS-001
+      concern: 驾驶员高风险分心未被检测（漏检）
+      source: 历史项目经验
+      severity_preliminary: 待定
+      downstream: 输入 HARA 危害事件
+    - id: CON-DMS-002
+      concern: 误报频繁导致驾驶员忽视真实告警
+      source: 行为研究与评审
+      severity_preliminary: 待定
+      downstream: 输入 HARA 与可控性分析
+    - id: CON-DMS-003
+      concern: 图像遮挡/光照极端导致状态不可信
+      source: 技术评审
+      severity_preliminary: 待定
+      downstream: 输入 HARA 场景细化
+    - id: CON-DMS-004
+      concern: 通信异常导致下游使用过期状态
+      source: 接口评审
+      severity_preliminary: 待定
+      downstream: 输入 FSC 接口安全机制
