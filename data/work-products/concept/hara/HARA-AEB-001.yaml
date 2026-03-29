@@ -23,7 +23,7 @@ base:
   inputs_references:
     - id: ITEM-AEB-001
       name: AEB Item Definition
-      version: v0.1
+      version: v1.0
       source: data/work-products/concept/item-definition/ITEM-AEB-001.yaml
       note: 单一真源
     - id: ODD-AEB-001

@@ -1,81 +1,121 @@
 meta:
   doc_id: ITEM-NOA-001
-  title: NOA（导航辅助驾驶/领航辅助）Item Definition（相关项定义）
+  title: L2 NOA（导航领航辅助 / Navigation Pilot Assist）相关项定义
   work_product_type: item-definition
   iso_ref:
     - ISO 26262-3
+    - GB/T 40429-2021
   asil: 待定
   status: Draft
   owner: 系统安全团队（待定）
   reviewers: []
-  version: v0.1
+  version: v0.3
   baseline: 未基线
-  last_updated: 2026-03-27
+  last_updated: 2026-03-29
 
 base:
-  purpose: 定义 NOA 功能在项目中的功能边界、外部接口、运行场景与约束，作为后续 HARA 与 FSC 的上游输入。
+  purpose: >-
+    定义 L2 级 NOA（导航领航辅助）：针对高速和封闭道路（I 型道路）的组合驾驶辅助（2 级驾驶自动化，GB/T 40429-2021 对齐），
+    在导航与高精/车道级路线约束下于限定 ODD 内提供纵向与横向组合驾驶辅助；能力范围与《NOA简介》一致时包括：
+    自动上下匝道、车道内自适应巡航、横向车道保持、换道辅助及驾驶员触发/确认换道、自动换道等（以项目 SSTS/PRD 冻结为准）。
+    本文档作为 HARA、FSC 及（如适用）SOTIF 工作的上游输入。
   scope_boundary:
     system_function_boundary:
-      - NOA 作为 L2/L2+ 驾驶辅助（等级与法规/ODD 以项目定义为准），在限定 ODD 内提供纵向/横向辅助与变道建议/执行（若支持）
-      - NOA 依赖导航/地图/定位与环境感知，输出对执行层的目标轨迹/控制请求（或对域控的策略请求，视架构而定）
+      - 目标道路类型包含高速和封闭道路（I 型道路）等《NOA简介》所述范围；具体地理围栏与道路等级以 ODD-NOA-001 冻结为准
+      - L2 组合驾驶辅助：持续执行动态驾驶任务中的车辆横向与纵向运动控制，驾驶员承担监控职责并随时准备接管（GB/T 40429-2021 2 级定义对齐）
+      - NOA 在限定 ODD 内利用导航路线、地图/定位与环境感知，完成自动上下匝道、车道内自适应巡航、车道保持及驾驶员触发/确认换道、自动换道等能力（以项目功能清单与《NOA简介》功能划分对齐）
+      - 包含 NOA 状态机、ODD 约束、提示报警与降级/退出策略及对执行层的控制请求/轨迹目标输出；不包含底层执行器闭环细节（若由底盘域实现）
     v_model_stage:
       - 概念
   inputs_references:
-    - id: PRD-NOA-001
-      name: NOA 功能需求（导航领航辅助）
-      version: v0.1
+    - id: PRD-NOA-L2-001
+      name: L2 NOA 功能需求（导航领航辅助）
+      version: v0.2
       source: 产品需求文档
-      note: 待提供
+      note: 待项目锁定功能范围与 ODD
     - id: ODD-NOA-001
-      name: NOA ODD 定义（道路类型/速度/天气/交通规则等）
+      name: NOA 设计运行范围（ODD）
       version: v0.1
-      source: 系统需求/法规合规文档
+      source: 系统需求 / 安全需求
+      note: 建议以结构化表格维护（如 ODD.xlsx）
+    - id: IF-SPEC-NOA-001
+      name: NOA 对外接口说明（感知/地图/HMI/执行）
+      version: v0.1
+      source: 系统接口规范
       note: 待提供
     - id: SYS-ARCH-001
       name: 系统架构说明
       version: v0.4
       source: 系统架构文档
       note: 草案
+    - id: DOC-NOA-INTRO-001
+      name: NOA简介
+      version: 桌面版 / 非受控副本
+      source: 产品/系统说明材料
+      note: 路径示例 C:\Users\ASUS\Desktop\NOA简介.docx；功能简介与功能划分以受控库正式版为准
+    - id: REG-GSS-L2-DRAFT
+      name: 智能网联汽车 组合驾驶辅助系统安全要求（征求意见稿）及配套释义（如项目采用）
+      version: 草案
+      source: 法规/标准
+      note: 条款引用需带版本与适用决议；不构成合规断言
   standard_requirements:
     - standard: ISO 26262
       part_clause: Part 3（Concept Phase）
-      applicability: Item Definition 作为 HARA 输入，需明确功能边界与场景假设
+      applicability: 相关项定义需支撑危害分析与安全概念输入
       evidence_ref: SYS-REV-NOA-ITEM-001（计划）
+    - standard: GB/T 40429-2021
+      part_clause: 驾驶自动化等级划分
+      applicability: L2 级用户与系统角色、动态驾驶任务边界
+      evidence_ref: 项目合规矩阵（待建）
+    - standard: ISO 21448
+      part_clause: 预期功能安全（SOTIF）
+      applicability: 性能局限、误用、传感器 ODD 边界等与 ISO 26262 malfunction 危害的切分
+      evidence_ref: SOTIF-WP-NOA-001（计划）
   project_assumptions:
-    - id: ASM-NOA-ITEM-001
-      assumption: NOA 的 ODD（Operational Design Domain，运行设计域）由项目明确，并能在运行时被系统识别/约束
-      impact: 场景边界与风险评估
-      risk_if_invalid: ODD 超界导致不可控风险增大
-      verification: ODD 文档评审 + 运行时 ODD 约束机制验证
-    - id: ASM-NOA-ITEM-002
-      assumption: 系统具备可靠的驾驶员接管/告警通路（HMI、方向盘扭矩/踏板等）
-      impact: 可控性（C）假设
-      risk_if_invalid: 驾驶员无法及时接管
-      verification: HMI/接管路径集成测试与用户试验
-    - id: ASM-NOA-ITEM-003
-      assumption: 车道线、前车、限速、匝道/分合流等关键要素的感知与定位能力满足 NOA 最小性能需求
-      impact: 轨迹规划与控制请求安全性
-      risk_if_invalid: 轨迹不合理导致碰撞/越界风险
-      verification: 场景测试集 + 实车/仿真验证（含极端场景）
+    - id: ASM-NOA-L2-001
+      assumption: ODD 由项目明确定义，且系统能在运行时识别关键边界并触发抑制、降级或退出
+      impact: 场景与暴露度（E）评估、降级策略完整性
+      risk_if_invalid: 超 ODD 运行导致风险不可接受
+      verification: ODD 文档评审 + 实车/仿真 ODD 探针测试
+    - id: ASM-NOA-L2-002
+      assumption: 驾驶员具备有效接管能力；HMI 能清晰提示系统状态、接管请求与降级原因
+      impact: 可控性（C）与告警链路
+      risk_if_invalid: 接管延迟或误解导致事故风险上升
+      verification: HMI 评审 + 用户试验 / 驾驶模拟器
+    - id: ASM-NOA-L2-003
+      assumption: 感知、定位与地图匹配在 ODD 内满足项目定义的最小性能与置信度策略
+      impact: 轨迹规划与碰撞避免相关假设
+      risk_if_invalid: 漏检/误检导致错误轨迹
+      verification: 场景库测试 + KPI 报告
+    - id: ASM-NOA-L2-004
+      assumption: 车辆搭载 AEB 等紧急避险能力，且 NOA 不因组合辅助而非法抑制紧急制动（以适用法规与架构为准）
+      impact: 相关项间安全依赖
+      risk_if_invalid: 紧急制动被抑制
+      verification: 接口规范与故障注入测试
   traceability:
-    - item_id: ITM-NOA-001
-      upstream: PRD-NOA-001
-      downstream: HARA-NOA-001（待建）/FSC-NOA-001（待建）
+    - item_id: ITM-NOA-L2-001
+      upstream: PRD-NOA-L2-001；DOC-NOA-INTRO-001（《NOA简介》功能简介与功能划分，非受控副本须替换为受控编号）
+      downstream: HARA-NOA-001 / FSC-NOA-001（待建）
       verification_method: 评审
       evidence_id: SYS-REV-NOA-ITEM-001（计划）
   open_verification_items:
-    - id: OVI-NOA-ITEM-001
-      item: NOA ODD 边界与降级/退出策略是否完整覆盖（道路类型、施工区、恶劣天气等）
+    - id: OVI-NOA-L2-001
+      item: L2 NOA 与自动变道（若配备）在法规/标准中的条款映射与证据包完整性
       owner: 待定
       due: 待定
       status: Open
-    - id: OVI-NOA-ITEM-002
-      item: 变道功能（若支持）的触发/抑制条件、与周边车交互策略是否一致且可解释
+    - id: OVI-NOA-L2-002
+      item: 匝道、分流、施工区、恶劣天气等 ODD 边界下的降级链路与 MRM/最小风险策略（若适用）是否闭环
       owner: 待定
       due: 待定
       status: Open
-    - id: OVI-NOA-ITEM-003
-      item: 最小风险状态（MRC/MRM，若适用）与驾驶员接管失败处理策略
+    - id: OVI-NOA-L2-003
+      item: 与 AEB、ELK、LKA 等相关项的仲裁与抑制矩阵是否经安全评审并可追溯
+      owner: 待定
+      due: 待定
+      status: Open
+    - id: OVI-NOA-L2-004
+      item: SOTIF：典型误用（脱手、分心、过度信任）与感知性能边界的记录与残余风险准则
       owner: 待定
       due: 待定
       status: Open
@@ -83,7 +123,7 @@ base:
     - role: 作者
       name: 系统安全工程师（待定）
       conclusion: N/A
-      date: 2026-03-27
+      date: 2026-03-29
     - role: 评审者
       name: 系统工程负责人（待定）
       conclusion: 待填写
@@ -93,117 +133,284 @@ base:
       conclusion: 待填写
       date: 待填写
   change_history:
+    - version: v0.3
+      date: 2026-03-29
+      summary: 依据《NOA简介》对齐功能简介（I 型道路、L2、导航与匝道/ACC/车道保持/换道划分）并补充输入追溯；功能架构/降级细节仍以 SYS-ARCH 与状态机为准
+      reason: 输入材料更新
+      author: AI Assistant
+    - version: v0.2
+      date: 2026-03-29
+      summary: 对齐 L2 NOA 相关项模板；补充驾驶自动化等级、ODD、整车安全策略要点、误用与 AEB 依赖等
+      reason: 模板升级与内容细化
+      author: AI Assistant
     - version: v0.1
       date: 2026-03-27
       summary: 创建 NOA Item Definition 草案
       reason: 概念阶段初始化
       author: AI Assistant
   notes_boundary:
-    - 本文档为 Item Definition 草案，不构成 ASIL 等级最终结论。
-    - ASIL 定级需在 HARA 中按具体 ODD 场景完成 S/E/C 评估。
-    - 若风险来自“无故障但性能不足/误用”情形，应补充 ISO 21448（SOTIF）并与 ISO 26262 结论分开记录。
+    - 本文为 Item Definition 草案；ASIL（Automotive Safety Integrity Level，汽车安全完整性等级）仅在 HARA 中结合场景与证据判定。
+    - 对「无故障但性能不足/误用」导致的风险，应在 ISO 21448（SOTIF）中单独分析并与 ISO 26262 malfunction 危害区分记录。
+    - 法规条款号（如行业强标征求意见稿）仅作项目对齐参考，需以项目采纳的版本与官方发布文本为准。
+    - 《NOA简介》中「降级思路」「功能架构」若仅为标题，具体降级链路与逻辑/物理架构须以项目受控设计（状态机、SYS-ARCH-001）为准。
 
 content:
   item_overview:
-    item_name: NOA（导航辅助驾驶/领航辅助）
-    functional_objective: 在限定 ODD 内，根据导航路线与环境感知输出纵向/横向辅助驾驶控制请求（或轨迹目标），并在边界条件触发时提示驾驶员接管或执行安全降级/退出。
+    item_name: L2 NOA（导航领航辅助，Navigation Pilot Assist）
+    functional_objective: >-
+      NOA 针对高速和封闭道路（I 型道路）的组合驾驶辅助功能（2 级驾驶自动化），主要为用户提供基于导航的驾驶辅助；
+      主要包括自动上下匝道、纵向自适应巡航以及横向的车道保持、换道辅助和自动换道等服务（与《NOA简介》功能简介一致；子能力以 PRD 冻结为准）。
+      在限定 ODD 内持续提示驾驶员监控交通并随时准备接管；在失效、ODD 越界或驾驶员未响应时，按策略降级、提示或退出至安全可控状态。
     non_safety_objectives:
-      - 提升路线跟随与车道保持舒适性
-      - 减少不必要的告警与突兀控制
-      - 提升通行效率（在合规前提下）
+      - 路线跟随平顺性与纵向舒适性
+      - 减少非必要告警与突兀横向/纵向动作
+      - 在合规与安全前提下提升通行效率
+  driving_automation:
+    level: "2（组合驾驶辅助）"
+    standard: GB/T 40429-2021
+    role_phases:
+      - phase: 激活前
+        user_role: 驾驶员确认交通环境、系统能力与责任边界，按需设置导航与功能开关
+        system_role: 自检 ODD、关键传感器/执行链路状态，不满足则禁止激活或限制能力
+      - phase: 运行中
+        user_role: 持续监控道路与系统状态，按提示执行接管；执行动态驾驶任务中的目标和策略监控（L2 定义要求）
+        system_role: 在 ODD 内执行横向与纵向运动控制子任务，输出状态与告警，请求接管或执行降级
+      - phase: 退出后
+        user_role: 完全承担动态驾驶任务
+        system_role: 进入非激活状态，保留必要提示与诊断信息
+  odd:
+    reference: ODD-NOA-001（见输入文档；详细道路类型/地理围栏/速度/天气/交通场景以项目 ODD 表为准）
+  vehicle_safety_strategy:
+    laws:
+      - 运行行为应符合道路交通法规及项目目标市场强制性要求（具体条款由合规部门维护，本文档不逐条断言合规结论）。
+    driving_behavior:
+      - 在 ODD 内避免无故扰乱交通流；对交通控制设施与周边参与者状态作出合理响应（策略细节见功能规范）。
+      - 保持与其他交通参与者合理的安全间距；探测与响应能力应与 ODD 及感知性能声明一致。
+    misuse_hmi:
+      - 设计应覆盖合理可预见误用（如过度依赖系统）；向驾驶员提供清晰、可区分的系统状态与接管请求。
+      - 首次进入运行状态前提示驾驶员在使用期间须持续履行动态驾驶任务相关职责（与适用标准要求对齐，以项目裁剪为准）。
+    fault_handling:
+      - 检测并响应影响安全运行的失效；在无法维持安全辅助时以安全方式终止或降级 NOA。
+      - 具备与风险相称的降级/最小风险策略（RMF/MRM 等命名以项目为准），并结合交通环境与系统能力选择策略。
+    sotif_residual: >-
+      整车层面残余风险接受准则与验证策略见项目 SOTIF 计划；与本相关项相关的性能局限场景须在 SOTIF 记录中可追溯至 NOA ODD 与测试证据。
+    alerts: 具体提示与报警清单见项目「系统提示/HMI」规范或专用表（如系统提示.xlsx）；声学/光学/触觉形式按 HMI 设计统一描述。
+    degradation_rationale: >-
+      《NOA简介》中「降级思路」条目下正文待项目补全；工程上降级状态与跳转以项目状态机为准：典型触发包括 ODD 边界、关键传感器/定位失效、
+      执行器拒绝、驾驶员未响应接管请求等；对应 NOA_Limited / NOA_Exit 等与 HMI 联动。
+  alerts_degradation:
+    rm_states:
+      - state: NOA_Full
+        description: ODD 内全功能可用（以项目定义为准）
+        note: 示例命名，项目可重命名
+      - state: NOA_Limited
+        description: 能力受限（如禁止变道、降低目标车速）
+        note: 待项目细化
+      - state: NOA_Exit
+        description: 退出 NOA，驾驶员承担全部动态驾驶任务
+        note: 与 HMI 提示联动
+    triggers:
+      - trigger: ODD 边界探测触发
+        description: 道路类型/天气/车速等超出 ODD
+        note: 对应传感器与地图策略见 ODD-NOA-001
+      - trigger: 关键失效或置信度不足
+        description: 感知/定位/执行反馈异常
+        note: 与 DTC 及降级表映射
+      - trigger: 驾驶员接管或抑制条件满足
+        description: 方向盘/制动/拨杆等有效干预
+        note: 以驾驶员在环策略为准
+  use_cases:
+    - id: UC-NOA-INTRO-001
+      name: 高速 I 型道路导航巡航（车道内 ACC + 车道保持）
+      primary_actors: 驾驶员、NOA
+      secondary_actors: 导航、感知、执行、HMI
+      preconditions: NOA 可用，ODD 为高速/封闭道路，导航路线有效
+      main_success: 车道内跟车与横向保持符合预期
+      extensions: 慢车、切入、车道减少
+    - id: UC-NOA-INTRO-002
+      name: 自动上下匝道
+      primary_actors: 驾驶员、NOA
+      secondary_actors: 地图、感知、HMI
+      preconditions: 匝道拓扑与定位匹配满足门限
+      main_success: 按策略完成减速/分合流或提示接管
+      extensions: 地图与实际不一致
+    - id: UC-NOA-INTRO-003
+      name: 驾驶员触发换道 / 确认换道 / 自动换道
+      primary_actors: 驾驶员、NOA
+      secondary_actors: 侧向感知、HMI
+      preconditions: 邻车道安全间隙与法规允许；确认类需驾驶员确认（若配置）
+      main_success: 换道完成或安全中止
+      extensions: 邻车加速、盲区目标、取消
+  function_partition:
+    - subfunction: 车道内自适应巡航
+      description: 在车道内基于导航与前方交通目标执行纵向自适应巡航（含跟车、调速等；《NOA简介》功能划分）
+      note: 与 ACC 能力边界、NOA 模式切换以项目为准
+    - subfunction: 驾驶员触发换道
+      description: 由驾驶员操作（如拨杆）显式触发换道意图，系统执行换道辅助路径与执行请求（《NOA简介》功能划分）
+      note: 人机职责与取消策略见 HMI 规范
+    - subfunction: 驾驶员确认换道
+      description: 系统提出换道建议或请求，需驾驶员确认后执行换道（《NOA简介》功能划分；若项目配置）
+      note: 与自动换道的策略差异须书面化
+    - subfunction: 自动换道
+      description: 在满足安全、法规与 ODD 策略下自动发起并完成换道（《NOA简介》功能划分；若项目配置）
+      note: 邻车道风险评估与禁止条件见设计
+    - subfunction: 导航与路线约束 / 感知融合与 ODD / 状态机与执行-HMI 输出
+      description: 支撑上述产品功能的共通技术块：路线与匝道拓扑、环境融合、NOA 状态机与降级、对执行层与 HMI 的输出（与《NOA简介》「功能架构」章节对应，细化见 SYS-ARCH-001）
+      note: 非《NOA简介》顶层四条目，但为实现所必需
   boundary_interfaces:
     in_scope:
-      - 导航路线与道路拓扑利用（地图/定位输入）
-      - 环境感知融合后的车道/目标/限速等要素使用
-      - 轨迹/速度规划（或策略请求）与 NOA 状态机
-      - 退出/降级/接管提示逻辑
-      - 向执行/底盘控制或域控输出控制请求/轨迹目标/状态
+      - 导航路线、地图/定位与 ODD 相关输入的融合与约束
+      - 车道线、目标、限速、道路结构等感知要素在规划中的使用
+      - L2 NOA 状态机、激活/退出/降级逻辑及提示报警策略
+      - 向执行层或域控输出横向/纵向控制请求、轨迹或目标状态及有效位
     out_of_scope:
-      - 低层执行控制闭环（转向/制动/动力执行器具体控制算法，若由底盘域负责）
-      - 驾驶员身份识别与舒适性娱乐功能
-      - 远程云控驾驶行为
+      - 转向/制动/驱动执行器底层控制律（若由其他相关项实现）
+      - 遥控泊车、L3+ 有条件自动驾驶责任转移
+      - 纯娱乐导航与驾驶员监控（DMS）本体算法（若 DMS 为独立 Item）
     interfaces:
-      - id: IF-NOA-001
-        object: 导航/地图/定位模块
+      - id: IF-NOA-MAP-001
+        object: 导航 / HD Map / 定位
         direction: 输入
-        signal: 路线、道路拓扑、定位质量、限速/匝道信息（如适用）
-        normal_range: 定位与地图匹配质量满足 NOA 最小要求
-        abnormal_handling: 定位/地图质量不足时抑制 NOA 或降级
-      - id: IF-NOA-002
-        object: 感知系统（摄像头/雷达/激光雷达等，按项目）
+        signal: 路线、车道拓扑、定位姿态与匹配质量、地理围栏事件
+        normal_range: 匹配质量与数据新鲜度满足 NOA 激活阈值
+        abnormal_handling: 降精度或禁止激活/触发降级
+      - id: IF-NOA-PER-001
+        object: 环境感知（摄像头 / 毫米波雷达 / 激光雷达等，按架构）
         direction: 输入
-        signal: 车道线/边界、目标车辆/障碍物、交通标志/限速（如适用）
-        normal_range: 输出周期与置信度满足规划需求
-        abnormal_handling: 置信度不足时限制功能并提示驾驶员接管
-      - id: IF-NOA-003
-        object: 车辆状态总线（CAN/Ethernet）
+        signal: 车道/边界、目标列表、速度/距离、交通标志与置信度
+        normal_range: 输出频率与延迟满足规划周期
+        abnormal_handling: 低置信度区域限制车速或禁止变道等
+      - id: IF-NOA-VEH-001
+        object: 车辆运动与底盘状态（总线）
         direction: 输入
-        signal: 车速、加速度、转角、档位、制动状态、转向灯、雨刮等
-        normal_range: 信号有效且时延满足控制链路
-        abnormal_handling: 关键状态信号失效触发降级/退出
-      - id: IF-NOA-004
-        object: 执行/底盘控制或域控
+        signal: 车速、横摆、转向角、制动/驱动执行状态、转向灯等
+        normal_range: 信号有效且同步
+        abnormal_handling: 关键信号丢失触发安全退出
+      - id: IF-NOA-EXE-001
+        object: 执行 / 域控制器
         direction: 输出
-        signal: 轨迹目标/加速度目标/车道变更请求/功能状态与有效位
-        normal_range: 下游确认接收并执行，反馈闭环（如有）
-        abnormal_handling: 通信超时或拒绝执行时进入安全降级并告警
-      - id: IF-NOA-005
-        object: HMI
+        signal: 横向/纵向请求或轨迹、功能状态、有效位、拒绝原因
+        normal_range: 下游在时限内确认执行
+        abnormal_handling: 超时/拒绝则降级并提示接管
+      - id: IF-NOA-HMI-001
+        object: HMI / 仪表 / 声学告警
         direction: 输出
-        signal: 激活/可用/退出/接管告警、原因码、等级
-        normal_range: 告警通路可用且优先级正确
-        abnormal_handling: HMI 不可用时禁止激活或强制退出
+        signal: 功能状态、接管请求、降级原因码、文本与图标
+        normal_range: 告警优先级符合人机工程策略
+        abnormal_handling: HMI 故障时禁止激活或强制退出（项目策略）
   operating_scenarios:
-    - id: SCN-NOA-001
-      description: 高速主路巡航与车道保持
-      conditions: 高速道路，良好天气，车道线清晰，速度 60-120 km/h（以 ODD 为准）
-      driver_state: 正常驾驶，可随时接管
-      note: 基线场景
-    - id: SCN-NOA-002
-      description: 匝道分合流与道路拓扑变化
-      conditions: 高速匝道/分流口，交通流变化
-      driver_state: 注意力可能分散，需要提示关注
-      note: 关键场景
-    - id: SCN-NOA-003
-      description: 施工区/临时标线导致车道边界不稳定
-      conditions: 施工区、锥桶、临时标线，车道线不清晰
-      driver_state: 需要及时接管
-      note: ODD 边界/降级触发场景
-    - id: SCN-NOA-004
-      description: 低能见度（雨雾夜间）感知能力下降
-      conditions: 大雨/雾/夜间逆光，感知置信度下降
-      driver_state: 需要及时接管
-      note: 降级/退出策略关键场景
+    - id: SCN-NOA-L2-000
+      description: 高速与封闭道路（I 型道路）导航辅助运行
+      conditions: 与《NOA简介》一致的道路类型；车速、天气、交通复杂度在 ODD 内
+      driver_state: 监控路况，手眼在环（以 DMS/方向盘策略为准）
+      note: 与功能简介对齐的顶层场景
+    - id: SCN-NOA-L2-001
+      description: 高速公路主路车道保持与跟车巡航
+      conditions: 结构化道路，车道线清晰，设计速度区间内，天气在 ODD 内
+      driver_state: 监控路况，手眼在环（以 DMS/方向盘策略为准）
+      note: 基线运行场景
+    - id: SCN-NOA-L2-002
+      description: 匝道驶入/驶出与分流鼻端区域
+      conditions: 曲率增大、车流交织、道路拓扑变化
+      driver_state: 注意力需求升高，易触发接管提示
+      note: 关键安全场景
+    - id: SCN-NOA-L2-003
+      description: 施工区 / 临时标线 / 车道封闭
+      conditions: 锥桶、水马、临时车道线，感知不确定性高
+      driver_state: 需及时接管
+      note: ODD 与降级策略重点
+    - id: SCN-NOA-L2-004
+      description: 雨雾夜间等低能见度
+      conditions: 传感器性能下降，定位/视觉受限
+      driver_state: 接管响应时间要求更高
+      note: SOTIF 与 ODD 交界
+    - id: SCN-NOA-L2-005
+      description: 变道辅助（若配置：自动/确认变道）
+      conditions: 邻车道空间、相对速度、法规允许车道
+      driver_state: 监控侧向风险，可随时取消
+      note: 功能若未配置可标注 N/A
+    - id: SCN-NOA-L2-006
+      description: 交通拥堵走走停停（若 ODD 包含）
+      conditions: 低速跟车，加塞频繁
+      driver_state: 注意力易分散
+      note: 与跟车舒适性及碰撞风险相关
+  functional_runtime_state: >-
+    纵向控制、横向控制、变道相关子状态机及相互抑制关系以项目状态机图与接口规范为准；须与降级表、ODD 事件及驾驶员接管检测一致。
+  foreseeable_misuse:
+    - 双手长时间脱离方向盘（若未配备合规 DMS 抑制策略）
+    - 视线长时间偏离路面（分心、使用手机）
+    - 在 ODD 外强行保持激活或忽视接管请求
+    - 过度信任系统导致接管延迟
+  non_functional:
+    quality: 软件过程与发布准则遵循项目质量体系（如 ASPICE 与功能安全流程接口，待项目声明）
+    performance: 规划与控制时延、最大横向/纵向加速度/加加速度限值以 SSTS 与标定为准（待填入具体指标表）
+  dependency_other_to_this:
+    - 高精地图/众包更新服务可用性与版本管理（若架构依赖）
+    - 云平台路线服务（若适用）的可用性与安全通信
+  dependency_this_to_other:
+    - 车辆须具备符合项目定义的自动紧急制动（AEB）能力；NOA 不应抑制正在执行的紧急制动请求（与适用标准及架构仲裁一致）
+    - 与 LKA、ELK、ACC 等相关功能的仲裁矩阵须书面化，避免控制目标冲突
+  dependency_environment:
+    - 道路几何、标志标线、照明与天气须在 ODD 声明范围内；超出则须退出或降级
   dependencies_constraints:
-    - id: DEP-NOA-001
-      dependency: ODD 识别与约束机制
-      constraint: 能识别道路类型/天气/速度等关键边界并限制激活
-      impact_if_failed: ODD 超界导致风险不可控
-    - id: DEP-NOA-002
-      dependency: 驾驶员告警与接管链路
-      constraint: 告警可达且可理解，接管检测可靠
-      impact_if_failed: 可控性下降，接管失败
-    - id: DEP-NOA-003
-      dependency: 感知与定位性能
-      constraint: 关键要素检测率/误检率/时延满足最小性能
-      impact_if_failed: 轨迹规划偏差、碰撞风险上升
-    - id: DEP-NOA-004
-      dependency: 车辆执行系统接口
-      constraint: 输出请求的时序/有效位/拒绝原因反馈明确
-      impact_if_failed: 失配导致突兀控制或无法安全退出
+    - id: DEP-NOA-L2-001
+      dependency: ODD 监控与地图/定位质量
+      constraint: 激活与能力释放门限可配置且可验证
+      impact_if_failed: 超 ODD 运行
+    - id: DEP-NOA-L2-002
+      dependency: 驾驶员监控与接管检测（方向盘扭矩、DMS 等）
+      constraint: 满足项目 L2 运行法规与内部准则
+      impact_if_failed: 脱手/分心未被有效约束
+    - id: DEP-NOA-L2-003
+      dependency: 感知与融合性能
+      constraint: 漏检率、误检率、时延满足 SSTS
+      impact_if_failed: 错误轨迹与碰撞风险
+    - id: DEP-NOA-L2-004
+      dependency: 执行器与通信链路
+      constraint: 超时、拒绝与回滚策略明确
+      impact_if_failed: 控制失步或无法安全退出
+    - id: DEP-NOA-L2-005
+      dependency: 电源与网络安全（如适用）
+      constraint: 异常工况下进入已知安全状态
+      impact_if_failed: 非预期激活或失效
+  known_failure_modes:
+    - 规划模块输出错误曲率或目标车速导致偏离车道或追尾风险（需在系统阶段细化失效模式）
+    - 感知/定位融合错误导致「虚假可行驶区域」
+  known_trigger_conditions:
+    - 以项目采纳的组合驾驶辅助标准中已知触发条件表为输入（如强标征求意见稿附录，以正式版本为准）；NOA 子功能逐项映射待完成
   known_failures_initial_concerns:
-    - id: CON-NOA-001
-      concern: 规划输出异常导致车辆偏离车道或与目标车碰撞
-      source: 经验/评审
+    - id: CON-NOA-L2-001
+      concern: 弯道/匝道速度规划不当导致冲出车道或侧向碰撞
+      source: 场景仿真与评审
       severity_preliminary: 待定
-      downstream: 输入 HARA 危害事件
-    - id: CON-NOA-002
-      concern: 应退出/降级但未退出，驾驶员未及时接管
+      downstream: HARA 危害事件
+    - id: CON-NOA-L2-002
+      concern: 变道决策错误（邻车加速/盲区目标）导致侧向碰撞
       source: 评审
       severity_preliminary: 待定
-      downstream: 输入 HARA（可控性假设）
-    - id: CON-NOA-003
-      concern: 误退出/误告警导致驾驶员困惑或误操作
-      source: 人机评审
+      downstream: HARA / SOTIF
+    - id: CON-NOA-L2-003
+      concern: 应退出未退出或提示不足，驾驶员未及时接管
+      source: 可控性假设评审
       severity_preliminary: 待定
-      downstream: 输入 HARA 与 SOTIF 补充
+      downstream: HARA（E/C）
+    - id: CON-NOA-L2-004
+      concern: 错误抑制 AEB 或与横向控制冲突导致紧急避险能力下降
+      source: 接口 FMEA
+      severity_preliminary: 待定
+      downstream: FSC 相关项协同
+    - id: CON-NOA-L2-005
+      concern: 地图/定位跳变导致轨迹突变
+      source: 数据记录分析
+      severity_preliminary: 待定
+      downstream: HARA / SOTIF
+  operational_safety_assurance:
+    operational_design: 运行阶段数据记录、事件触发上传、OTA 与配置变更的安全影响分析（如适用）按项目运维安全计划执行；本文档仅标识需求入口
+  implementation:
+    architecture: >-
+      《NOA简介》中「功能架构」条目下正文待项目补全；逻辑/物理架构与数据流以 SYS-ARCH-001 及接口规范为准。
+      NOA 软件部署于项目指定智驾域控（待填具体 ECU）。
+    nf_quality: 与智驾软件发布门禁一致（静态分析、需求追溯、变更评审）
+    nf_performance: 规划环路与控制周期、端到端时延预算见软件架构说明（待填）
+    element_failure_modes: 要素级失效模式在系统/软件 FMEA 中展开；本文档不替代 FMEA
+    element_trigger_conditions: 传感器单点性能边界在 SOTIF 与传感器安全概念中维护

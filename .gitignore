@@ -27,7 +27,7 @@ logs/
 *.log
 data/local/
 
-# Generated document outputs (reproducible artifacts)
+# 唯一约定文档生成出口（render_from_yaml 默认 --out-dir out）；勿再使用其他输出目录名提交生成物
 out/
 out_*/
 

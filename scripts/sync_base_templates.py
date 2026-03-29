@@ -65,7 +65,7 @@ def extract_excel_sheet_titles(excel_md: str) -> List[str]:
 
 
 def build_base_word_yaml() -> Dict[str, Any]:
-    # 与当前 base-template.word.md 对齐的规范（模板驱动）
+    # 与当前 base-template.word.md 对齐的规范（模板驱动；章节编号与 MD 手工模板一致）
     return {
         "template_type": "base-word",
         "version": "v0.1",
@@ -85,6 +85,7 @@ def build_base_word_yaml() -> Dict[str, Any]:
         "sections": [
             {
                 "heading": "Change History（变更历史）",
+                "heading_level": 2,
                 "blocks": [
                     {
                         "subheading": "Document Change History（文档履历）",
@@ -121,33 +122,33 @@ def build_base_word_yaml() -> Dict[str, Any]:
                 ],
             },
             {
-                "heading": "1. General Information（一般信息）",
+                "heading": "General Information（一般信息）",
                 "blocks": [
-                    {"subheading": "1.1 Document Purpose（文档目的）", "source": "base.purpose"},
-                    {"subheading": "1.2 Document Scope（文档范围）", "source": "base.document_scope"},
+                    {"subheading": "Document Purpose（文档目的）", "source": "base.purpose"},
+                    {"subheading": "Document Scope（文档范围）", "source": "base.document_scope"},
+                    {
+                        "subheading": "Input Document（输入文档）",
+                        "table": {
+                            "columns": ["Document No.", "File name", "Version"],
+                            "source": "base.input_documents",
+                            "mapping": {"Document No.": "document_no", "File name": "file_name", "Version": "version"},
+                        },
+                    },
+                    {
+                        "subheading": "References（参考文档）",
+                        "table": {
+                            "columns": ["Document No.", "File name", "Version"],
+                            "source": "base.references",
+                            "mapping": {"Document No.": "document_no", "File name": "file_name", "Version": "version"},
+                        },
+                    },
                 ],
             },
             {
-                "heading": "1.3 Input Document（输入文档）",
-                "table": {
-                    "columns": ["Document No.", "File name", "Version"],
-                    "source": "base.input_documents",
-                    "mapping": {"Document No.": "document_no", "File name": "file_name", "Version": "version"},
-                },
-            },
-            {
-                "heading": "1.4 References（参考文档）",
-                "table": {
-                    "columns": ["Document No.", "File name", "Version"],
-                    "source": "base.references",
-                    "mapping": {"Document No.": "document_no", "File name": "file_name", "Version": "version"},
-                },
-            },
-            {
-                "heading": "2. Terms and Abbreviations（术语与缩略语）",
+                "heading": "Terms and Abbreviations（术语与缩略语）",
                 "blocks": [
                     {
-                        "subheading": "2.1 Terms（术语）",
+                        "subheading": "Terms （术语）",
                         "table": {
                             "columns": ["Term", "Definition", "Source"],
                             "source": "base.terms",
@@ -155,7 +156,7 @@ def build_base_word_yaml() -> Dict[str, Any]:
                         },
                     },
                     {
-                        "subheading": "2.2 Abbreviations（缩略语）",
+                        "subheading": "Abbreviations（缩略语）",
                         "table": {
                             "columns": ["Term", "Definition"],
                             "source": "base.abbreviations",
@@ -180,7 +181,7 @@ def build_base_excel_yaml() -> Dict[str, Any]:
         "workbook": {
             "sheets": [
                 {
-                    "name": "Cover",
+                    "name": "Cover（封面）",
                     "kind": "key_value",
                     "rows": [
                         {"key": "title", "value_path": "meta.title"},

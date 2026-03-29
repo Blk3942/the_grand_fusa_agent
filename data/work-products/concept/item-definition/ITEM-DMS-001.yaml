@@ -111,6 +111,38 @@ content:
       - 降低误报率
       - 提升告警可接受性
       - 优化夜间与逆光场景可用性
+  driving_automation:
+    level: 非驾驶自动化横向/纵向控制（舱内监测与告警类功能）
+    standard: GB/T 40429-2021（参考驾驶员角色与监控义务；不声明 L2 行车自动化）
+    role_phases: []
+  odd:
+    reference: N/A（DMS 的 ODD 与整车 NOA/行车功能解耦；摄像头安装与光照条件见依赖与场景约束）
+  vehicle_safety_strategy:
+    laws: 待填写（引用项目适用的智能网联/舱内监控相关法规与型式要求）
+    driving_behavior: 待填写（对驾驶员注意力、接管义务与告警响应的期望行为）
+    sotif_residual: 待填写（整车层残余风险接受准则及与 ISO 21448 活动对应关系；勿与 ISO 26262 危害混写）
+  alerts_degradation:
+    alerts:
+      - 分级视觉/声学告警文案与图标（与 HMI 规范一致）
+      - 状态栏/指示灯请求（与域控协议一致）
+    rationale: 图像丢失或置信度不足时进入降级监测；通信超时上报故障态。
+    rm_states:
+      - state: 全功能监测
+        description: 图像与算法置信度正常
+        note: ""
+      - state: 降级监测
+        description: 单路图像失效或低置信度
+        note: 收窄告警策略
+      - state: 故障/不可用
+        description: 关键输入长时间无效
+        note: 输出无效态与故障码
+    triggers:
+      - trigger: 图像帧丢失超过 T1
+        description: 进入降级监测
+        note: 待定 ms
+      - trigger: 与 HMI/域控通信超时 T2
+        description: 输出故障态
+        note: 待定 ms
   boundary_interfaces:
     in_scope:
       - 驾驶员舱内图像采集（红外/可见光摄像头，具体型号待定）
@@ -167,6 +199,69 @@ content:
       conditions: 0-30 km/h，拥堵路况
       driver_state: 临时视线偏离
       note: 需区分正常行为与风险行为
+  function_partition:
+    - subfunction: 图像采集与预处理
+      description: 舱内相机输入、曝光与丢帧处理
+      note: 硬件相关
+    - subfunction: 状态估计与告警策略
+      description: 分心/疲劳等分类与阈值
+      note: 算法相关
+    - subfunction: 对外输出与状态机
+      description: HMI/域控接口与有效位
+      note: 集成相关
+  use_cases:
+    - id: UC-DMS-001
+      name: 城市路况注意力监控
+      primary_actors: 驾驶员、DMS
+      secondary_actors: HMI、域控（消费状态）
+      preconditions: 车辆上电，DMS 可用，车速在监测范围内
+      main_success: 检测到分心趋势时分级提示，状态有效位正确
+      extensions: 光照差导致置信度低时降级提示策略
+    - id: UC-DMS-002
+      name: 高速疲劳趋势告警
+      primary_actors: 驾驶员、DMS
+      secondary_actors: HMI
+      preconditions: 高速场景，算法运行周期满足
+      main_success: 疲劳指标超阈时触发告警且不频繁误报
+      extensions: 驾驶员关闭某类提示时的行为（若项目允许）
+  functional_runtime_state:
+    states:
+      - state: "Off"
+        description: 相关项未运行或未就绪
+        note: ""
+      - state: Standby
+        description: 就绪、等待有效输入
+        note: ""
+      - state: Active
+        description: 正常监测与输出
+        note: ""
+      - state: Degraded
+        description: 输入质量不足，输出降级状态
+        note: ""
+    transitions:
+      - trigger: 上电完成且自检通过
+        description: Off → Standby
+        note: ""
+      - trigger: 收到有效车辆状态且相机 OK
+        description: Standby → Active
+        note: ""
+      - trigger: 图像长时间无效
+        description: Active → Degraded
+        note: ""
+    notes: 详细状态机以项目 UML 为准；本节供安全分析与接口对齐。
+  foreseeable_misuse:
+    - id: 1
+      description: 故意遮挡摄像头以规避监测
+      note: 与误用场景、可控性分析输入 HARA/SOTIF
+    - id: 2
+      description: 过度依赖告警忽视路况
+      note: HMI 设计约束
+  non_functional:
+    quality: 软件需满足项目编码规范与静态分析门禁（待定义）
+    performance: 端到端时延、CPU 负载、帧率目标见 SSTS（待填写具体数值）
+  dependency_other_to_this: 待填写（如整车电源、摄像头供应商安装规范）
+  dependency_this_to_other: 待填写（如 HMI 对告警呈现能力、域控对状态消费策略）
+  dependency_environment: 待填写（温度、振动、电磁环境）
   dependencies_constraints:
     - id: DEP-DMS-001
       dependency: 摄像头硬件与安装位
@@ -209,3 +304,37 @@ content:
       source: 接口评审
       severity_preliminary: 待定
       downstream: 输入 FSC 接口安全机制
+  known_failure_modes: 摄像头失效、算法输出卡死、总线断连导致状态不更新（细化见 FMEA）
+  known_trigger_conditions: 持续丢帧、CPU 过载、标定偏差超阈
+  operational_safety_assurance:
+    operational_design: 待填写（运行阶段数据采集、OTA 回滚策略、现场诊断与告警闭环，若项目适用）
+  implementation:
+    architecture: 逻辑上分为感知输入、算法与状态机、对外输出；详细框图见架构示意图与 UML。
+    architecture_elements:
+      - element: 舱内相机与 ISP
+        description: 提供图像与时间戳
+        note: 供应商相关
+      - element: DMS 应用与状态机
+        description: 状态估计、告警与降级
+        note: 软件单元划分以架构为准
+      - element: 通信栈
+        description: 与 HMI/域控消息
+        note: CAN/SOMEIP 等以接口规范为准
+    interfaces_brief:
+      - interface: IF-DMS-001～004
+        description: 见边界接口表；此处为追溯摘要
+        note: 详细字段见接口规范
+    nf_performance: 各要素实时性、带宽与容错指标从概念阶段非功能要求拆解（待填具体值）
+    element_failure_modes: 相机无图像、算法无输出、通信间歇失败
+    element_trigger_conditions: 与功能层面局限一致并细化到要素级（待与 FMEA 对齐）
+  diagrams:
+    - id: DIAG-DMS-ARCH-001
+      title: DMS 边界与数据流（示意）
+      placement: item_architecture
+      file_stem: dms_architecture_context
+      mermaid: |
+        flowchart LR
+          Cam["驾驶员舱摄像头"] --> DMS["DMS 软件"]
+          Bus["车辆状态总线"] --> DMS
+          DMS --> Hmi["HMI"]
+          DMS --> Adas["ADAS/域控"]

@@ -11,7 +11,8 @@ from typing import Dict, List, Tuple
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_DOCS_DIR = ROOT / "docs" / "work-products"
+# 与 render_from_yaml.py 默认输出根目录一致（生成物 MD/DOCX 的唯一约定出口）
+DEFAULT_DOCS_DIR = ROOT / "out"
 RULES_PATH = ROOT / "docs" / "templates" / "schemas" / "document-structure-rules.json"
 
 
@@ -109,7 +110,7 @@ def main() -> int:
     parser.add_argument(
         "--target",
         default=str(DEFAULT_DOCS_DIR),
-        help="Markdown file or directory to validate. Default: docs/work-products",
+        help="Markdown file or directory to validate. Default: out/（与渲染输出根目录一致）",
     )
     parser.add_argument(
         "--rules",

@@ -1,0 +1,443 @@
+meta:
+  doc_id: ITEM-NOP-001
+  title: NOP（导航辅助驾驶 / Navigation on Pilot）Item Definition（相关项定义）
+  work_product_type: item-definition
+  iso_ref:
+    - ISO 26262-3
+    - GB/T 40429-2021
+    - ISO 21448
+  asil: 待定
+  status: Draft
+  owner: 系统安全团队（待定）
+  reviewers: []
+  version: v0.1
+  baseline: 未基线
+  last_updated: 2026-03-29
+
+base:
+  purpose: >-
+    定义 NOP（Navigation on Pilot，导航辅助驾驶）在项目中的功能边界、外部接口、运行场景、整车安全策略与降级假设，
+    作为 HARA、FSC 及（如适用）SOTIF 工作的上游输入。NOP 通常指在限定 ODD 内基于导航路线与车道级道路模型，
+    提供纵向与横向组合驾驶辅助（L2），驾驶员持续监控并随时准备接管；具体子功能（如自动/确认变道、匝道辅助等）
+    以项目 PRD 与 ODD 冻结范围为准。
+  scope_boundary:
+    system_function_boundary:
+      - L2 组合驾驶辅助：持续执行动态驾驶任务中的车辆横向与纵向运动控制子任务，驾驶员承担监控职责并随时准备接管（GB/T 40429-2021 对齐）
+      - 在限定 ODD 内融合导航路线、地图/定位与环境感知，实现车道保持、跟车、限速/弯道协调、匝道/分合流及项目定义的变道等能力
+      - 包含 NOP 状态机、ODD 约束、提示报警与降级/退出策略；向执行层输出横向/纵向控制请求或轨迹目标；不含执行器底层闭环细节
+    v_model_stage:
+      - 概念
+  inputs_references:
+    - id: PRD-NOP-L2-001
+      name: NOP 功能需求（导航辅助驾驶）
+      version: v0.1
+      source: 产品需求文档
+      note: 功能清单与 ODD 以项目冻结为准
+    - id: ODD-NOP-001
+      name: NOP 设计运行范围（ODD）
+      version: v0.1
+      source: 系统需求 / 安全需求
+      note: 道路类型、地理围栏、速度、天气等建议结构化维护
+    - id: IF-SPEC-NOP-001
+      name: NOP 对外接口说明（感知/地图/HMI/执行）
+      version: v0.1
+      source: 系统接口规范
+      note: 草案
+    - id: SYS-ARCH-001
+      name: 系统架构说明
+      version: v0.4
+      source: 系统架构文档
+      note: 草案
+    - id: REG-GSS-L2-REF
+      name: 智能网联汽车组合驾驶辅助系统相关强制性标准及项目适用条款（以官方发布与合规矩阵为准）
+      version: 以项目采纳版本为准
+      source: 法规/标准
+      note: 不构成合规断言
+  standard_requirements:
+    - standard: ISO 26262
+      part_clause: Part 3（Concept Phase）
+      applicability: Item Definition 支撑 HARA 与安全概念输入
+      evidence_ref: SYS-REV-NOP-ITEM-001（计划）
+    - standard: GB/T 40429-2021
+      part_clause: 驾驶自动化等级划分
+      applicability: L2 用户与系统角色、动态驾驶任务边界
+      evidence_ref: 项目合规矩阵（待建）
+    - standard: ISO 21448
+      part_clause: SOTIF
+      applicability: 性能局限、误用、地图/感知边界与 malfunction 危害切分
+      evidence_ref: SOTIF-WP-NOP-001（计划）
+  project_assumptions:
+    - id: ASM-NOP-L2-001
+      assumption: ODD 由项目明确定义，运行时能识别关键边界并触发抑制、降级或退出
+      impact: 场景与暴露度（E）、降级链完整性
+      risk_if_invalid: 超 ODD 运行导致风险不可接受
+      verification: ODD 评审 + 实车/仿真探针
+    - id: ASM-NOP-L2-002
+      assumption: 驾驶员具备有效接管能力；HMI 能提示系统状态、接管请求与降级原因
+      impact: 可控性（C）与告警链路
+      risk_if_invalid: 接管延迟或误解
+      verification: HMI 评审 + 用户试验 / 模拟器
+    - id: ASM-NOP-L2-003
+      assumption: 感知、定位与地图匹配在 ODD 内满足项目最小性能与置信度策略
+      impact: 轨迹规划与安全裕度
+      risk_if_invalid: 漏检/误检导致错误轨迹
+      verification: 场景库 + KPI
+    - id: ASM-NOP-L2-004
+      assumption: 车辆具备 AEB 等紧急避险能力；NOP 仲裁不非法抑制紧急制动（以架构与法规为准）
+      impact: 相关项间安全依赖
+      risk_if_invalid: 紧急制动被不当抑制
+      verification: 接口规范与故障注入测试
+  traceability:
+    - item_id: ITM-NOP-L2-001
+      upstream: PRD-NOP-L2-001
+      downstream: HARA-NOP-001（待建）/ FSC-NOP-001（待建）
+      verification_method: 评审
+      evidence_id: SYS-REV-NOP-ITEM-001（计划）
+  open_verification_items:
+    - id: OVI-NOP-L2-001
+      item: NOP 子功能（含变道若配备）与目标市场法规/强标条款的映射与证据包
+      owner: 待定
+      due: 待定
+      status: Open
+    - id: OVI-NOP-L2-002
+      item: 匝道/分流/施工区/恶劣天气等 ODD 边界的降级链路与最小风险策略（MRM/RMF 等）是否闭环
+      owner: 待定
+      due: 待定
+      status: Open
+    - id: OVI-NOP-L2-003
+      item: 与 AEB、LKA、ELK、ACC 等相关项的仲裁与抑制矩阵经安全评审并可追溯
+      owner: 待定
+      due: 待定
+      status: Open
+  review_approval:
+    - role: 作者
+      name: 系统安全工程师（待定）
+      conclusion: N/A
+      date: 2026-03-29
+    - role: 评审者
+      name: 系统工程负责人（待定）
+      conclusion: 待填写
+      date: 待填写
+    - role: 批准者
+      name: 功能安全经理（待定）
+      conclusion: 待填写
+      date: 待填写
+  change_history:
+    - version: v0.1
+      date: 2026-03-29
+      summary: 创建 NOP（导航辅助驾驶）Item Definition 草案
+      reason: 概念阶段初始化
+      author: AI Assistant
+  notes_boundary:
+    - 本文为 Item Definition 草案；ASIL（Automotive Safety Integrity Level，汽车安全完整性等级）仅在 HARA 中结合场景与证据判定。
+    - malfunction（功能异常）与「无故障但性能不足/误用」应区分：后者宜在 ISO 21448（SOTIF）中分析并记录残余风险准则。
+    - NOP 与业内其他命名（如 NOA、高速/城市领航等）可能重叠；本项目以 doc_id 与 PRD 术语为准。
+
+content:
+  item_overview:
+    item_name: NOP（Navigation on Pilot，导航辅助驾驶）
+    functional_objective: >-
+      在限定 ODD 内，依据导航路线与道路环境，为驾驶员提供 L2 组合驾驶辅助：包括车道保持、自适应巡航或等效纵向控制、
+      弯道/限速协调、匝道与分合流辅助，以及项目定义的变道辅助；持续提示驾驶员监控交通并随时准备接管；
+      在失效、ODD 越界或驾驶员未响应时按策略降级、提示或退出至安全可控状态。
+    non_safety_objectives:
+      - 路线跟随平顺性与纵向舒适性
+      - 减少非必要告警与突兀横向/纵向动作
+      - 在合规与安全前提下提升通行效率
+
+  driving_automation:
+    level: "2（组合驾驶辅助）"
+    standard: GB/T 40429-2021
+    role_phases:
+      - phase: 激活前
+        user_role: 确认交通环境、系统能力与责任边界，设置导航与功能开关
+        system_role: 自检 ODD、传感器/执行链路，不满足则禁止激活或限制能力
+      - phase: 运行中
+        user_role: 持续监控道路与系统状态，按提示接管；履行 L2 对动态驾驶任务的监控职责
+        system_role: 在 ODD 内执行横纵向运动控制子任务，输出状态与告警，请求接管或降级
+      - phase: 退出后
+        user_role: 完全承担动态驾驶任务
+        system_role: 非激活状态，保留必要提示与诊断信息
+
+  odd:
+    reference: 见 ODD-NOP-001（速度、道路类型、地理围栏、天气、交通复杂度等以项目冻结表为准）
+
+  vehicle_safety_strategy:
+    laws: >-
+      运行行为应符合道路交通法规及目标市场强制性要求；组合驾驶辅助系统适用条款由合规部门维护于合规矩阵，本文档不逐条断言合规结论。
+    driving_behavior: >-
+      在 ODD 内保持与交通流协调的安全间距与合理车速；对施工区、临时标线、他车切入等作出可预期响应；探测与响应能力与 ODD 声明一致。
+    sotif_residual: >-
+      整车层对性能局限类风险的接受准则与验证策略见项目 SOTIF 计划；NOP 相关场景须可追溯至 ODD 与测试证据，且不与 ISO 26262 malfunction 危害混写在同一条款下。
+
+  alerts_degradation:
+    alerts:
+      - 功能可用/激活/退出/接管请求等多级提示（声学/光学/触觉以 HMI 规范为准）
+      - 限速、车道、变道、施工区等事件提示
+    rationale: >-
+      ODD 越界、关键传感器/定位失效、执行器拒绝、置信度不足或驾驶员未响应接管时，按状态机降级、提示或退出；
+      地图/定位跳变时限制变道或降低目标车速等（策略以项目为准）。
+    rm_states:
+      - state: NOP_Full
+        description: ODD 内项目定义的全能力可用
+        note: 命名可项目自定义
+      - state: NOP_Limited
+        description: 能力受限（如禁止变道、降低车速上限）
+        note: ""
+      - state: NOP_Exit
+        description: 退出 NOP，驾驶员承担全部动态驾驶任务
+        note: 与 HMI 联动
+    triggers:
+      - trigger: ODD 边界事件（道路类型/天气/车速等）
+        description: 进入 Limited 或请求退出
+        note: 与 ODD-NOP-001 映射
+      - trigger: 关键失效或融合置信度不足
+        description: 降级或退出
+        note: 与 DTC 表映射
+      - trigger: 驾驶员有效接管或抑制
+        description: 退出或抑制横向/纵向子功能
+        note: 方向盘/制动/拨杆等以项目为准
+
+  boundary_interfaces:
+    in_scope:
+      - 导航路线、地图/定位与 ODD 相关输入的融合
+      - 车道、目标、限速、道路结构等感知要素用于规划
+      - NOP 状态机、激活/退出/降级与提示策略
+      - 向执行层输出横纵向请求、轨迹或目标状态及有效位
+    out_of_scope:
+      - 转向/制动/驱动执行器底层控制律（由其他相关项实现）
+      - L3+ 责任转移、遥控泊车
+      - DMS 本体（若为独立 Item）
+    interfaces:
+      - id: IF-NOP-MAP-001
+        object: 导航 / HD Map / 定位
+        direction: 输入
+        signal: 路线、车道拓扑、位姿、匹配质量、地理围栏事件
+        normal_range: 匹配质量与数据新鲜度满足激活门限
+        abnormal_handling: 降精度、禁止激活或降级
+      - id: IF-NOP-PER-001
+        object: 环境感知（摄像头/毫米波雷达/激光雷达等）
+        direction: 输入
+        signal: 车道/边界、目标列表、交通标志、置信度
+        normal_range: 频率与延迟满足规划周期
+        abnormal_handling: 低置信度区域限速或禁止变道等
+      - id: IF-NOP-VEH-001
+        object: 车辆运动与底盘状态总线
+        direction: 输入
+        signal: 车速、横摆、转向、制动/驱动状态、转向灯等
+        normal_range: 信号有效且同步
+        abnormal_handling: 关键信号丢失触发安全退出
+      - id: IF-NOP-EXE-001
+        object: 执行/域控制器
+        direction: 输出
+        signal: 横纵向请求或轨迹、功能状态、有效位、拒绝原因
+        normal_range: 下游时限内确认
+        abnormal_handling: 超时/拒绝则降级并提示接管
+      - id: IF-NOP-HMI-001
+        object: HMI/仪表/声学告警
+        direction: 输出
+        signal: 状态、接管请求、降级原因码、文本与图标
+        normal_range: 告警优先级符合人机策略
+        abnormal_handling: HMI 故障时禁止激活或强制退出（项目策略）
+
+  operating_scenarios:
+    - id: SCN-NOP-L2-001
+      description: 高速公路主路车道保持与跟车
+      conditions: 结构化道路，车道清晰，车速在 ODD 内，天气符合 ODD
+      driver_state: 监控路况，手眼在环（脱手策略以项目/DMS 为准）
+      note: 基线场景
+    - id: SCN-NOP-L2-002
+      description: 匝道驶入/驶出与分流鼻端
+      conditions: 曲率与车流交织增大
+      driver_state: 注意力需求高，易触发接管
+      note: 关键安全场景
+    - id: SCN-NOP-L2-003
+      description: 施工区/临时标线/车道封闭
+      conditions: 锥桶、水马、临时车道线
+      driver_state: 需及时接管
+      note: ODD 与降级重点
+    - id: SCN-NOP-L2-004
+      description: 雨雾夜间等低能见度
+      conditions: 感知与视觉受限
+      driver_state: 接管响应时间要求高
+      note: SOTIF 与 ODD 交界
+    - id: SCN-NOP-L2-005
+      description: 变道辅助（若配置）
+      conditions: 邻车道空间、相对速度、法规允许车道
+      driver_state: 监控侧向风险，可随时取消
+      note: 未配置则 N/A
+
+  function_partition:
+    - subfunction: 导航与路线约束
+      description: 路线、车道级引导、匝道拓扑
+      note: 与地图版本相关
+    - subfunction: 环境感知融合与 ODD 推理
+      description: 可行驶区域与边界事件
+      note: 融合架构
+    - subfunction: 运动规划
+      description: 横纵向与变道决策（以 PRD 为准）
+      note: 实时性关键
+    - subfunction: NOP 状态机与降级管理
+      description: 激活/退出/降级与仲裁输入
+      note: 安全关键
+    - subfunction: 执行请求与 HMI 输出
+      description: 控制接口与人机提示
+      note: 与执行器/HMI 规范对齐
+
+  use_cases:
+    - id: UC-NOP-001
+      name: 高速主路导航巡航
+      primary_actors: 驾驶员、NOP
+      secondary_actors: 地图、感知、执行、HMI
+      preconditions: 车辆上电，NOP 可用，ODD 满足，导航路线有效
+      main_success: 车道保持与跟车协调运行，状态与提示正确
+      extensions: 前方慢车、切入车辆、车道减少
+    - id: UC-NOP-002
+      name: 匝道进出与分流
+      primary_actors: 驾驶员、NOP
+      secondary_actors: 地图、感知、HMI
+      preconditions: 拓扑与定位匹配质量满足门限
+      main_success: 按项目策略完成减速/车道引导或提示接管
+      extensions: 地图与实际道路不一致时的降级
+    - id: UC-NOP-003
+      name: 变道辅助（若配备）
+      primary_actors: 驾驶员、NOP
+      secondary_actors: 侧向感知、HMI
+      preconditions: 邻车道安全间隙与法规允许
+      main_success: 自动或确认变道完成或安全中止
+      extensions: 邻车加速、盲区目标、驾驶员取消
+
+  functional_runtime_state:
+    states:
+      - state: "Off"
+        description: 功能关闭或未就绪
+        note: ""
+      - state: Standby
+        description: 自检通过，等待激活条件
+        note: ""
+      - state: Active
+        description: NOP 运行中（可含子模态）
+        note: 子状态机见设计
+      - state: Degraded
+        description: 能力受限运行
+        note: ""
+    transitions:
+      - trigger: 驾驶员激活且 ODD/自检满足
+        description: Standby → Active
+        note: ""
+      - trigger: 退出条件或驾驶员关闭
+        description: Active → Standby/Off
+        note: ""
+      - trigger: 失效或 ODD 越界
+        description: 进入 Degraded 或退出
+        note: ""
+    notes: 与降级策略表及项目 UML 状态机对齐。
+
+  foreseeable_misuse:
+    - id: 1
+      description: 双手长时间脱离方向盘（若法规/项目要求 DMS 与抑制策略）
+      note: HARA/SOTIF 可控性
+    - id: 2
+      description: 分心使用手机或长时间视线偏离
+      note: 与 HMI/告警策略
+    - id: 3
+      description: ODD 外强行保持激活或忽视接管请求
+      note: 退出链路
+    - id: 4
+      description: 过度信任系统导致接管延迟
+      note: 培训与 HMI 设计
+
+  non_functional:
+    quality: 软件过程与发布门禁遵循项目质量体系（ASPICE 与功能安全流程接口，待项目声明）
+    performance: 规划与控制时延、横纵向加速度/加加速度限值以 SSTS 与标定为准（待填数值表）
+
+  dependency_other_to_this: 高精地图/定位服务可用性与版本策略；云平台路线服务（若适用）的可用性与安全通信
+  dependency_this_to_other: AEB 等紧急避险能力不得被 NOP 非法抑制；与 LKA/ELK/ACC 等仲裁矩阵须书面化
+  dependency_environment: 道路几何、标志标线、照明与天气须在 ODD 声明内；超出须退出或降级
+
+  dependencies_constraints:
+    - id: DEP-NOP-L2-001
+      dependency: ODD 监控与地图/定位质量
+      constraint: 激活与能力释放门限可配置且可验证
+      impact_if_failed: 超 ODD 运行
+    - id: DEP-NOP-L2-002
+      dependency: 驾驶员监控与接管检测（方向盘、DMS 等）
+      constraint: 满足项目 L2 运行要求
+      impact_if_failed: 脱手/分心未被有效约束
+    - id: DEP-NOP-L2-003
+      dependency: 感知与融合性能
+      constraint: 漏误检与时延满足 SSTS
+      impact_if_failed: 错误轨迹与碰撞风险
+    - id: DEP-NOP-L2-004
+      dependency: 执行器与通信链路
+      constraint: 超时、拒绝与回滚策略明确
+      impact_if_failed: 控制失步或无法安全退出
+
+  known_failures_initial_concerns:
+    - id: CON-NOP-L2-001
+      concern: 弯道/匝道速度或曲率规划不当导致冲出车道或侧向碰撞
+      source: 仿真与评审
+      severity_preliminary: 待定
+      downstream: HARA
+    - id: CON-NOP-L2-002
+      concern: 变道决策错误导致侧向碰撞
+      source: 评审
+      severity_preliminary: 待定
+      downstream: HARA / SOTIF
+    - id: CON-NOP-L2-003
+      concern: 应退出未退出或提示不足，驾驶员未及时接管
+      source: 可控性评审
+      severity_preliminary: 待定
+      downstream: HARA（E/C）
+    - id: CON-NOP-L2-004
+      concern: 错误抑制 AEB 或与横向控制冲突导致避险能力下降
+      source: 接口分析
+      severity_preliminary: 待定
+      downstream: FSC 协同
+    - id: CON-NOP-L2-005
+      concern: 地图/定位跳变导致轨迹突变
+      source: 数据记录
+      severity_preliminary: 待定
+      downstream: HARA / SOTIF
+
+  known_failure_modes: 规划输出错误曲率或目标车速；融合错误导致虚假可行驶区域；执行器响应失步
+  known_trigger_conditions: 以项目采纳的组合驾驶辅助标准及内部准则中的触发条件为输入，子功能逐项映射待完成
+
+  operational_safety_assurance:
+    operational_design: 运行数据记录、事件上传、OTA 与配置变更的安全影响分析（若适用）按项目运维安全计划执行
+
+  implementation:
+    architecture: 逻辑架构见 SYS-ARCH-001；NOP 软件部署于项目指定智驾域控（待填）
+    architecture_elements:
+      - element: 定位与地图适配
+        description: 路线、车道拓扑、匹配质量
+        note: 与 ODD 强相关
+      - element: 感知融合
+        description: 可行驶区域与目标
+        note: 传感器责任边界见设计
+      - element: 规划与控制应用
+        description: NOP 状态机与轨迹/请求生成
+        note: 安全相关参数受控
+      - element: HMI 与诊断
+        description: 提示与故障上报
+        note: 优先级策略
+    interfaces_brief:
+      - interface: IF-NOP-MAP/PER/VEH/EXE/HMI-001
+        description: 详见边界接口表；实现层映射至信号与周期
+        note: 与 FSC/TSR 追溯待建
+    nf_performance: 规划环路周期与端到端时延预算见软件架构说明（待填）
+    element_failure_modes: 要素级失效在系统/软件 FMEA 展开；本文档不替代 FMEA
+    element_trigger_conditions: 传感器与地图性能边界在 SOTIF 与传感器安全概念中维护
+
+  diagrams:
+    - id: DIAG-NOP-ARCH-001
+      title: NOP 逻辑架构与数据流（示意）
+      placement: item_architecture
+      file_stem: nop_architecture_context
+      mermaid: |
+        flowchart LR
+          Map["导航/地图/定位"] --> NOP["NOP 应用\n规划·状态机"]
+          Perc["感知融合"] --> NOP
+          Veh["车辆状态"] --> NOP
+          NOP --> Exe["执行/域控"]
+          NOP --> Hmi["HMI"]

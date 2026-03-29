@@ -87,6 +87,9 @@
 | `config/env.example` | 环境变量模板；复制为 `.env` 后本地填写，**勿提交** `.env` |
 | `src/the_grand_fusa_agent/` | Python 包占位，可扩展为 API 客户端、编排、RAG 管道等 |
 | `requirements.txt` | 最小依赖；按实际集成增补 |
+| `scripts/render_from_yaml.py` | YAML 单一真源渲染 MD/DOCX/XLSX；**默认输出根目录为仓库根下 `out/`**（`--out-dir out`）；Item Definition 示例见 `data/work-products/concept/item-definition/ITEM-DMS-001.yaml` |
+| `scripts/validate_fusa_yaml.py` | 校验 YAML 元数据与 item-definition/hara 等必填 `content` 段；默认扫描 `data/work-products` |
+| `scripts/validate_fusa_docs.py` | 校验已生成 Markdown 结构；**默认扫描 `out/`**（与渲染出口一致） |
 
 ### 注意事项
 

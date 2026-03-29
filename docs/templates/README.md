@@ -20,9 +20,9 @@
 
 当部分工作成果更适合用 Excel/Word 交付时，推荐使用“结构化单一真源（YAML）”作为唯一内容来源：
 
-- **单一真源（YAML）**：`data/work-products/**/<DOC-ID>.yaml`
-- **可评审版本（MD）**：由脚本生成，便于 Git diff 与评审
-- **交付版本（DOCX/XLSX）**：由脚本生成，便于排版与表格处理
+- **单一真源（YAML）**：`data/work-products/**/<DOC-ID>.yaml`（人工维护，不当作渲染临时目录）
+- **可评审版本（MD）**：由脚本生成到 `out/`，便于 Git diff 与评审
+- **交付版本（DOCX/XLSX）**：由脚本生成到 **`out/`**（仓库根目录下唯一约定导出根路径；默认 `--out-dir out`）
 
 为避免二进制模板（`.docx/.xlsx`）进仓库造成 diff/合并困难，本项目使用**文本化模板规范（YAML）**：
 
@@ -38,6 +38,10 @@
 - 生成多格式：
   - 指定输出格式：`python scripts/render_from_yaml.py --input data/work-products/concept/item-definition/ITEM-DMS-001.yaml --out-dir out --formats md,docx`
   - 不指定输出格式（按 `work_product_type` 默认）：`python scripts/render_from_yaml.py --input data/work-products/concept/item-definition/ITEM-DMS-001.yaml --out-dir out`
+  - **默认输出目录**：`--out-dir/<doc_id>/` 下放 `*.md` / `*.docx` / `*.xlsx`，并在同目录 `uml/` 中生成 `.mmd` 与渲染后的 `.png`，Markdown 内嵌相对路径引用图片。
+  - **扁平输出（旧布局）**：加 `--flat-output` 时，文档在 `--out-dir` 根目录，图表在 `uml/<doc_id>/`，避免多文档文件名冲突。
+  - **UML**：在 YAML `content.diagrams` 中配置 `mermaid` 多行文本或 `source_mmd`（相对仓库根）；`placement` 控制插入位置（如 Item Definition 的 `item_architecture`、HARA 文末 `main_end`）。渲染由 `scripts/render_mermaid.py` 完成（`npx @mermaid-js/mermaid-cli`、全局 `mmdc` 或 Kroki；可选 `--offline-demo` 生成 matplotlib 示意 PNG）。
+  - **Item Definition 正文字段**（与 `work-products/item-definition/template.md` 对齐）：`driving_automation`、`odd`、`vehicle_safety_strategy`、`alerts_degradation`、`function_partition`（子功能表）、`use_cases`（多用例块；未提供时回退为 `operating_scenarios` 场景表）、`functional_runtime_state`（`states`/`transitions` 表）、`foreseeable_misuse`（结构化表）、`non_functional`、`dependency_*`、`implementation.architecture_elements` / `interfaces_brief`（简表；缺省则要素回退为 in/out scope、接口回退为详细 IF 表）等。详见示例 `data/work-products/concept/item-definition/ITEM-DMS-001.yaml`。旧字段 `vehicle_safety_strategy.misuse_hmi` / `fault_handling` 已不再输出到 MD/DOCX（若仍写在 YAML 中仅作备查，请并入其他段落或删除）。
 
 样式维护建议：
 
@@ -73,8 +77,8 @@
 
 运行方式（项目根目录）：
 
-- `python scripts/validate_fusa_docs.py`
-- 指定单文件：`python scripts/validate_fusa_docs.py --target docs/work-products/concept/ITEM-DMS-001.md`
+- `python scripts/validate_fusa_docs.py`（默认扫描 `out/` 下已生成的 Markdown）
+- 指定单文件示例：`python scripts/validate_fusa_docs.py --target out/ITEM-DMS-001/ITEM-DMS-001.md`
 
 校验目标：
 

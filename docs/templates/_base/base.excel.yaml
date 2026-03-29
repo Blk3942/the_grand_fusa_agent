@@ -2,7 +2,7 @@ template_type: base-excel
 version: v0.1
 workbook:
   sheets:
-  - name: Cover
+  - name: Cover（封面）
     kind: key_value
     rows:
     - key: title

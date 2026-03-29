@@ -11,21 +11,29 @@
     "last_updated"
   ],
   "required_h1_sections_global": [
-    "Change History（变更历史）",
     "General Information（一般信息）",
     "Terms and Abbreviations（术语与缩略语）",
-    "正文内容（Main Content）",
     "可追溯性（Traceability）",
     "待验证项（Open Verification Items）",
     "评审与批准（Review and Approval）"
   ],
   "work_product_specific_keywords": {
     "item-definition": [
-      "Item 概述",
-      "边界与接口",
-      "运行场景与运行条件"
+      "相关项定义",
+      "功能定义",
+      "整车层面安全策略",
+      "整车层面 SOTIF 残余风险接受准则",
+      "提示报警与降级",
+      "功能行为与用例",
+      "功能运行状态",
+      "合理可预见的误用",
+      "运行安全保障",
+      "功能实现",
+      "非功能性要求（实现层）",
+      "要素层面已知功能局限"
     ],
     "hara": [
+      "危害分析与风险评估",
       "危害事件",
       "风险评估",
       "安全目标"

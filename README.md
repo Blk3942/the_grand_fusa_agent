@@ -13,8 +13,12 @@
 The_Grand_FuSa_Agent/
 ├── AGENTS.md                 # 协作者/Agent 行为约定
 ├── README.md
+├── data/work-products/       # FuSa 工作成果单一真源（YAML，建议纳入版本控制）
+├── out/                      # 渲染生成物唯一出口（MD/DOCX/XLSX、uml/；默认被 .gitignore 忽略）
 ├── docs/
-│   └── USAGE_AND_NOTES.md    # 关键文件使用说明与注意事项（必读）
+│   ├── USAGE_AND_NOTES.md    # 关键文件使用说明与注意事项（必读）
+│   └── templates/            # 文档模板、格式与校验规则
+├── scripts/                  # validate_*.py、render_from_yaml.py 等
 ├── .cursor/
 │   ├── rules/                # Cursor 规则（.mdc）
 │   └── skills/
@@ -24,6 +28,8 @@ The_Grand_FuSa_Agent/
 ├── src/the_grand_fusa_agent/ # 运行时代码占位
 └── requirements.txt
 ```
+
+生成文档时请使用 **`--out-dir out`**（脚本默认值），勿再使用其他零散输出目录名。
 
 ## 快速开始
 

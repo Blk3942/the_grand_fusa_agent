@@ -1,0 +1,438 @@
+meta:
+  doc_id: ITEM-SHIFT-001
+  title: 自动变速器换挡控制 Item Definition（相关项定义）
+  work_product_type: item-definition
+  iso_ref:
+    - ISO 26262-3
+    - ISO 26262-6
+    - ISO 21448
+  asil: 待定
+  status: Draft
+  owner: 动力系统安全 / 底盘电控（待定）
+  reviewers: []
+  version: v0.1
+  baseline: 未基线
+  last_updated: 2026-03-29
+
+base:
+  purpose: >-
+    定义「自动变速器换挡控制」相关项在项目中的功能边界、外部接口、运行场景、整车安全策略与降级假设，
+    作为 HARA、FSC 及（如适用）SOTIF 工作的上游输入。本相关项覆盖驾驶员换挡意图的采集与仲裁、
+    与变速箱控制单元（TCU，Transmission Control Unit）及执行端的挡位请求/确认、挡位与驱动扭矩协调、
+    驻车挡（P）锁止与解锁条件、挡位显示与人机提示等；不包含发动机/电机本体标定细节及离合器摩擦片材料级设计。
+  scope_boundary:
+    system_function_boundary:
+      - 电子换挡器（Shift-by-Wire）或等效换挡输入的解析、滤波、冗余与诊断
+      - 挡位请求仲裁：驾驶员意图、系统保护（车速/转速/温度）、拖车/救援模式、诊断会话等
+      - 与 TCU/变速箱执行端的挡位请求与状态反馈；P 挡锁止机构（Parking Lock）协同与互锁逻辑
+      - 向 HMI/仪表输出挡位与告警；与 EPB、动力切断、跛行等策略的接口边界（以项目架构为准）
+      - 换挡冲击与平顺性目标在系统层表述；具体液压/离合器控制律由 TCU/变速箱相关项实现
+    v_model_stage:
+      - 概念
+  inputs_references:
+    - id: PRD-SHIFT-001
+      name: 自动变速器换挡功能需求（电子换挡 / 挡位逻辑）
+      version: v0.1
+      source: 产品需求文档
+      note: 含 P/R/N/D 及前进挡级、手动/运动模式、换挡器类型以项目冻结为准
+    - id: ODD-SHIFT-001
+      name: 换挡功能设计运行范围（ODD）/适用条件
+      version: v0.1
+      source: 系统需求 / 安全需求
+      note: 车速门限、点火/电源模式、静止/行驶中允许挡位、低温/高负荷保护等
+    - id: IF-SPEC-SHIFT-001
+      name: 换挡控制对外接口说明（换挡器、TCU、动力、HMI、制动）
+      version: v0.1
+      source: 系统接口规范
+      note: 草案
+    - id: SYS-ARCH-001
+      name: 系统架构说明
+      version: v0.4
+      source: 系统架构文档
+      note: 草案
+    - id: REG-PARK-REF
+      name: 目标市场关于驻车、换挡互锁及显示的一般性法规要求（以法规清单与合规矩阵为准）
+      version: 以项目采纳版本为准
+      source: 法规/标准
+      note: 不构成合规断言
+  standard_requirements:
+    - standard: ISO 26262
+      part_clause: Part 3（Concept Phase）
+      applicability: Item Definition 支撑换挡相关 malfunction 与 HARA 输入
+      evidence_ref: SYS-REV-SHIFT-ITEM-001（计划）
+    - standard: ISO 21448
+      part_clause: SOTIF
+      applicability: 性能局限、误用、人机显示与真实挡位一致性等切分与残余风险准则
+      evidence_ref: SOTIF-WP-SHIFT-001（计划）
+  project_assumptions:
+    - id: ASM-SHIFT-001
+      assumption: 车速、轮速、方向、制动与油门等底盘信号可用于挡位互锁与仲裁，且同步与有效位策略明确
+      impact: 防止行驶中误挂 P、R 与溜车相关场景
+      risk_if_invalid: 互锁失效或错误允许换挡
+      verification: 接口测试 + 故障注入
+    - id: ASM-SHIFT-002
+      assumption: TCU 与变速箱执行端可反馈实际挡位、执行状态、故障与拒绝原因；超时与拒绝策略书面化
+      impact: 换挡请求闭环与降级
+      risk_if_invalid: 显示与真实挡位不一致或请求未执行
+      verification: 与 TCU 联调与 HIL
+    - id: ASM-SHIFT-003
+      assumption: 换挡器具备项目规定的冗余与诊断（如双路、CRC、开路短路检测）；失效进入安全状态
+      impact: 非预期挡位请求与可控性
+      risk_if_invalid: 虚假挡位或卡滞
+      verification: 硬件/软件安全分析
+    - id: ASM-SHIFT-004
+      assumption: 与驱动扭矩协调策略明确：换挡过程中扭矩干预、禁止突然反向大扭矩等，避免传动系冲击或失速
+      impact: 车辆动力学与可控性
+      risk_if_invalid: 非预期加速/减速或传动系损坏
+      verification: 标定与整车试验
+  traceability:
+    - item_id: ITM-SHIFT-001
+      upstream: PRD-SHIFT-001
+      downstream: HARA-SHIFT-001（待建）/ FSC-SHIFT-001（待建）
+      verification_method: 评审
+      evidence_id: SYS-REV-SHIFT-ITEM-001（计划）
+  open_verification_items:
+    - id: OVI-SHIFT-001
+      item: 拖车/救援/举升模式、12V 欠压、碰撞后断电等场景下 P 挡与驻车锁止的闭环策略与证据
+      owner: 待定
+      due: 待定
+      status: Open
+    - id: OVI-SHIFT-002
+      item: 显示挡位与实际挡位不一致时的告警与跛行策略是否满足项目目标与法规清单
+      owner: 待定
+      due: 待定
+      status: Open
+    - id: OVI-SHIFT-003
+      item: 与 EPB、Autohold、坡道辅助、ESC 的仲裁与互锁矩阵经安全评审并可追溯
+      owner: 待定
+      due: 待定
+      status: Open
+  review_approval:
+    - role: 作者
+      name: 系统安全工程师（待定）
+      conclusion: N/A
+      date: 2026-03-29
+    - role: 评审者
+      name: 系统工程负责人（待定）
+      conclusion: 待填写
+      date: 待填写
+    - role: 批准者
+      name: 功能安全经理（待定）
+      conclusion: 待填写
+      date: 待填写
+  change_history:
+    - version: v0.1
+      date: 2026-03-29
+      summary: 创建自动变速器换挡控制 Item Definition 草案
+      reason: 概念阶段初始化
+      author: AI Assistant
+  notes_boundary:
+    - 本文为 Item Definition 草案；ASIL（Automotive Safety Integrity Level，汽车安全完整性等级）仅在 HARA 中结合场景与证据判定。
+    - malfunction（功能异常）与「无故障但性能不足/误用」应区分：后者宜在 ISO 21448（SOTIF）中分析并记录残余风险准则。
+    - 本相关项与「驾驶自动化等级（L0–L5）」无直接对应关系；GB/T 40429 等若引用，仅作项目文档惯例，非对本功能分级。
+
+content:
+  item_overview:
+    item_name: 自动变速器换挡控制（含电子换挡与 TCU 协同）
+    functional_objective: >-
+      依据驾驶员换挡意图与整车状态，在允许条件下向变速箱执行端发出合法、一致的挡位请求，
+      保证 P 挡驻车锁止与解锁逻辑正确，挡位显示与人机提示与真实状态一致，
+      在故障、保护或边界条件下降级、拒绝换挡或提示驾驶员，并与驱动扭矩协调避免非预期车辆行为。
+    non_safety_objectives:
+      - 换挡平顺性与响应速度
+      - 人机操作符合性与误触防护
+      - 诊断与售后可读性（DTC、冻结帧策略以项目为准）
+
+  driving_automation:
+    level: 不适用（非驾驶自动化功能）
+    standard: GB/T 40429-2021（仅作项目文档惯例引用；本相关项不按 L0–L5 分级）
+    role_phases: []
+
+  odd:
+    reference: >-
+      见 ODD-SHIFT-001：典型包括车速、电源模式（IGN/ON）、静止/行驶中允许挡位、变速箱油温与保护、
+      拖车模式、低附/高附等工况；具体以项目冻结表为准。
+
+  vehicle_safety_strategy:
+    laws: >-
+      驻车、换挡互锁及显示的一般性要求以目标市场法规与项目合规矩阵为准；本文档不逐条断言合规结论。
+    driving_behavior: >-
+      行驶中禁止进入与当前方向冲突的挡位（如高速前进中挂 R）；静止与 P 挡解锁条件与制动踏板等策略以项目为准。
+    sotif_residual: >-
+      整车层对性能局限类风险（如人机误操作、显示歧义）的接受准则与验证策略见项目 SOTIF 计划；
+      与 ISO 26262 malfunction 危害勿混写在同一条款下。
+
+  alerts_degradation:
+    alerts:
+      - 挡位拒绝、执行失败、保护模式、温度过高/过低等提示
+      - 换挡器故障、与 TCU 通信异常、显示不一致告警
+    rationale: >-
+      关键信号失效、通信超时、TCU 拒绝或执行超时、互锁不满足时，拒绝换挡、保持当前安全挡位或
+      进入跛行（limp home），并提示驾驶员；具体状态机与 DTC 以项目为准。
+    rm_states:
+      - state: Shift_Normal
+        description: 换挡器与 TCU 正常，允许项目定义的挡位请求范围
+        note: 命名可项目自定义
+      - state: Shift_Limited
+        description: 能力受限（如禁止某些挡位、仅允许 P/N、限速扭矩）
+        note: ""
+      - state: Shift_FailSafe
+        description: 跛行或固定挡位/禁止行驶请求，直至条件满足或维修
+        note: 与 HMI 联动
+    triggers:
+      - trigger: 车速/互锁条件不满足
+        description: 拒绝换挡或保持当前挡位
+        note: 与 ODD-SHIFT-001 映射
+      - trigger: TCU 拒绝/超时/故障
+        description: 进入 Limited 或 FailSafe
+        note: 与 DTC 表映射
+      - trigger: 换挡器电气故障
+        description: 安全降级与告警
+        note: 与硬件诊断一致
+
+  boundary_interfaces:
+    in_scope:
+      - 换挡器物理/逻辑输入、冗余与诊断
+      - 挡位请求仲裁与互锁逻辑
+      - 与 TCU 的挡位请求与状态反馈接口
+      - P 挡锁止机构协同请求与状态
+      - HMI 挡位显示与文本告警输出
+    out_of_scope:
+      - 变速箱内部液压/离合器详细控制律（TCU 内部实现）
+      - 发动机/电机本体扭矩控制标定细节
+      - 非本项目的其他域控制器（如仅引用接口）
+    interfaces:
+      - id: IF-SHIFT-SWL-001
+        object: 电子换挡器（Shift Lever / Selector）
+        direction: 输入
+        signal: 挡位意图、按键、诊断状态、冗余通道
+        normal_range: 有效位与采样周期满足设计
+        abnormal_handling: 开路/短路/不一致 → 拒绝或降级
+      - id: IF-SHIFT-TCU-001
+        object: 变速箱控制单元 TCU
+        direction: 输入/输出
+        signal: 挡位请求、实际挡位、执行状态、拒绝原因、故障
+        normal_range: 通信 alive 与超时策略满足
+        abnormal_handling: 超时进入安全模式并告警
+      - id: IF-SHIFT-PT-001
+        object: 动力系统（ENG/MOT / 混动协调）
+        direction: 输入/输出
+        signal: 扭矩请求/限制、转速、换挡协调标志
+        normal_range: 协调时序与限值满足
+        abnormal_handling: 扭矩限制或禁止换挡
+      - id: IF-SHIFT-VEH-001
+        object: 车辆运动与底盘总线
+        direction: 输入
+        signal: 车速、轮速、方向、制动、油门、横摆等
+        normal_range: 信号有效且同步
+        abnormal_handling: 关键信号丢失 → 保守互锁
+      - id: IF-SHIFT-EPB-001
+        object: 电子驻车 EPB / 驻车锁止相关
+        direction: 输入/输出
+        signal: 驻车状态、P 挡锁止请求/反馈
+        normal_range: 与项目互锁表一致
+        abnormal_handling: 禁止不安全解锁 P
+      - id: IF-SHIFT-HMI-001
+        object: HMI / 仪表
+        direction: 输出
+        signal: 显示挡位、告警、提示文本
+        normal_range: 与真实挡位一致策略
+        abnormal_handling: 显示故障时提示检修
+
+  operating_scenarios:
+    - id: SCN-SHIFT-001
+      description: 静止起步 P→D/R
+      conditions: 制动、车速、互锁满足
+      driver_state: 观察环境后操作
+      note: 基线场景
+    - id: SCN-SHIFT-002
+      description: 行驶中 D 与 N 切换或手动升降挡（若配置）
+      conditions: 车速与转速在允许范围
+      driver_state: 双手在控，注意动力变化
+      note: 与 TCU 协调
+    - id: SCN-SHIFT-003
+      description: 低速或静止挂 R
+      conditions: 车速低于门限
+      driver_state: 观察后视镜
+      note: 互锁与影像辅助（若配置）
+    - id: SCN-SHIFT-004
+      description: 停车挂 P 与驻车锁止
+      conditions: 车速为零、制动或项目策略
+      driver_state: 拉手刹/EPB 习惯以项目 HMI 为准
+      note: 坡道防溜与 EPB 协同
+    - id: SCN-SHIFT-005
+      description: 低温/高负荷保护限制挡位或扭矩
+      conditions: 油温、离合器保护
+      driver_state: 可能感知到受限
+      note: SOTIF 与舒适性边界
+
+  function_partition:
+    - subfunction: 换挡输入采集与诊断
+      description: 换挡器信号、冗余、滤波
+      note: 与安全相关诊断策略
+    - subfunction: 挡位仲裁与互锁
+      description: 车速、方向、制动、TCU 能力、模式位
+      note: 安全核心
+    - subfunction: TCU 通信与超时管理
+      description: 请求/应答、同步、重试
+      note: 实时性
+    - subfunction: 扭矩协调与换挡提示
+      description: 与动力/制动域协调标志
+      note: 与接口规范对齐
+    - subfunction: HMI 显示与告警
+      description: 挡位与故障提示
+      note: 一致性
+
+  use_cases:
+    - id: UC-SHIFT-001
+      name: 正常上电后 P→D 驶离
+      primary_actors: 驾驶员、换挡控制
+      secondary_actors: TCU、制动、HMI
+      preconditions: 制动踩下、互锁满足、TCU 正常
+      main_success: 挂入 D，显示一致，车辆可行驶
+      extensions: TCU 拒绝、提示检修
+    - id: UC-SHIFT-002
+      name: 行驶中误操作 R 或 P
+      primary_actors: 驾驶员、换挡控制
+      secondary_actors: TCU、HMI
+      preconditions: 车速高于门限
+      main_success: 拒绝换挡并提示
+      extensions: 换挡器卡滞、信号异常
+    - id: UC-SHIFT-003
+      name: 停车 P 挡与驻车锁止
+      primary_actors: 驾驶员、换挡控制
+      secondary_actors: TCU、EPB、HMI
+      preconditions: 车速为零、条件满足
+      main_success: P 锁止，显示 P，可安全离车
+      extensions: 坡道、电源异常
+
+  functional_runtime_state:
+    states:
+      - state: "Off"
+        description: 电源关闭或换挡功能未初始化
+        note: ""
+      - state: Standby
+        description: 自检完成，等待有效操作
+        note: ""
+      - state: Active
+        description: 正常响应换挡与显示
+        note: ""
+      - state: Degraded
+        description: 受限或跛行
+        note: ""
+    transitions:
+      - trigger: 上电自检通过
+        description: Off/Standby → Active
+        note: ""
+      - trigger: 下电或故障
+        description: 进入 Off 或 Degraded
+        note: ""
+      - trigger: 通信或 TCU 故障
+        description: Active → Degraded
+        note: ""
+    notes: 与项目 UML 状态机及 TCU 状态对齐。
+
+  foreseeable_misuse:
+    - id: 1
+      description: 未停稳即挂 P 或猛拉换挡器
+      note: 互锁与提示
+    - id: 2
+      description: 依赖显示挡位而非实际车辆感受（显示异常时）
+      note: HMI 与诊断
+    - id: 3
+      description: 拖车/维修模式下仍按常规换挡
+      note: 模式位与说明
+    - id: 4
+      description: 儿童误触换挡器（若存在）
+      note: 防护与解锁策略
+
+  non_functional:
+    quality: 软件发布与变更门禁遵循项目质量体系（与功能安全流程接口，待项目声明）
+    performance: 换挡请求到 TCU 确认时延、重复换挡频率限制以 SSTS 为准（待填数值表）
+
+  dependency_other_to_this: 稳定的车速、制动、电源与网络；TCU 软件版本与标定匹配
+  dependency_this_to_other: 驱动扭矩与制动执行不得在非安全策略下冲突；HMI 须显示关键告警
+  dependency_environment: 极端温度、海拔、油品对变速箱保护的影响在 ODD 与 SOTIF 中声明
+
+  dependencies_constraints:
+    - id: DEP-SHIFT-001
+      dependency: 车速与方向一致性
+      constraint: 互锁与门限可配置
+      impact_if_failed: 错误允许 R/P
+    - id: DEP-SHIFT-002
+      dependency: TCU 通信与版本
+      constraint: 超时与拒绝策略
+      impact_if_failed: 非预期固定挡或失速
+    - id: DEP-SHIFT-003
+      dependency: 换挡器硬件与线束
+      constraint: 诊断覆盖率目标
+      impact_if_failed: 虚假挡位
+    - id: DEP-SHIFT-004
+      dependency: 与 EPB/制动协同
+      constraint: P 解锁与制动互锁
+      impact_if_failed: 溜车
+
+  known_failures_initial_concerns:
+    - id: CON-SHIFT-001
+      concern: 非预期换挡或实际挡位与意图不一致导致错误行驶方向或失速
+      source: 评审
+      severity_preliminary: 待定
+      downstream: HARA
+    - id: CON-SHIFT-002
+      concern: 显示挡位与真实挡位不一致，驾驶员误判
+      source: HMI 分析
+      severity_preliminary: 待定
+      downstream: HARA / SOTIF
+    - id: CON-SHIFT-003
+      concern: P 锁止未正确接合或异常解锁导致溜车
+      source: 接口分析
+      severity_preliminary: 待定
+      downstream: HARA
+    - id: CON-SHIFT-004
+      concern: 与扭矩协调错误导致冲击过大或传动系损伤
+      source: 标定评审
+      severity_preliminary: 待定
+      downstream: FSC / 非功能安全
+
+  known_failure_modes: 换挡器电气故障；TCU 通信丢失；互锁逻辑错误；显示驱动错误
+  known_trigger_conditions: 极端温度、电压异常、总线风暴、软件刷写失败等（待项目 FMEA 展开）
+
+  operational_safety_assurance:
+    operational_design: 运行数据、OTA 与配置变更对换挡安全的影响分析按项目运维安全计划执行
+
+  implementation:
+    architecture: 逻辑架构见 SYS-ARCH-001；换挡软件部署于项目指定动力域/车身域控制器（待填）
+    architecture_elements:
+      - element: 换挡输入与诊断
+        description: 换挡器与冗余
+        note: 与硬件设计一致
+      - element: 仲裁与互锁
+        description: 挡位合法性判定
+        note: 安全相关参数受控
+      - element: TCU 适配层
+        description: 协议与超时
+        note: 与供应商接口
+      - element: HMI 与诊断
+        description: 显示与 DTC
+        note: 一致性策略
+    interfaces_brief:
+      - interface: IF-SHIFT-SWL/TCU/PT/VEH/EPB/HMI-001
+        description: 详见边界接口表；实现层映射至信号与周期
+        note: 与 FSC/TSR 追溯待建
+    nf_performance: 端到端时延与总线负载预算见软件架构说明（待填）
+    element_failure_modes: 要素级失效在系统/软件 FMEA 展开；本文档不替代 FMEA
+    element_trigger_conditions: 传感器与执行器边界在详细设计中维护
+
+  diagrams:
+    - id: DIAG-SHIFT-ARCH-001
+      title: 换挡控制逻辑架构与数据流（示意）
+      placement: item_architecture
+      file_stem: shift_architecture_context
+      mermaid: |
+        flowchart LR
+          SWL["电子换挡器\nSWL"] --> SC["换挡控制\n仲裁·互锁"]
+          Veh["车速/制动/电源"] --> SC
+          SC --> TCU["TCU / 变速箱"]
+          SC --> Hmi["HMI 挡位显示"]
+          PT["动力域\n扭矩协调"] <--> SC
+          EPB["EPB / P锁"] <--> SC

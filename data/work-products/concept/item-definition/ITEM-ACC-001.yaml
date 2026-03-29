@@ -4,78 +4,107 @@ meta:
   work_product_type: item-definition
   iso_ref:
     - ISO 26262-3
+    - GB/T 40429-2021
+    - ISO 21448
   asil: 待定
   status: Draft
   owner: 系统安全团队（待定）
   reviewers: []
-  version: v0.1
+  version: v0.2
   baseline: 未基线
-  last_updated: 2026-03-27
+  last_updated: 2026-03-29
 
 base:
-  purpose: 定义 ACC（Adaptive Cruise Control，自适应巡航控制）功能在项目中的功能边界、外部接口、运行场景与约束，作为后续 HARA 与 FSC 的上游输入。
+  purpose: >-
+    定义 ACC（Adaptive Cruise Control，自适应巡航控制）在项目中的功能边界、外部接口、运行场景、整车安全策略与降级假设，
+    作为 HARA、FSC 及（如适用）SOTIF 工作的上游输入。ACC 在限定工况下维持驾驶员设定车速，并基于前向目标信息调节纵向加减速以维持设定时距；
+    不包含横向车道保持或转向控制（若与 LKA/横向功能组合，仲裁与责任边界以项目架构与 PRD 为准）。
   scope_boundary:
     system_function_boundary:
-      - 在限定工况下自动维持设定车速，并根据前车目标调节纵向加减速以保持设定车距
-      - 涵盖 ACC 的激活/保持/退出逻辑、目标选择与跟驰控制请求输出（不含底盘执行闭环细节）
+      - 纵向运动控制辅助：目标检测与选择、跟车时距控制、设定车速恢复/调速、舒适性与安全边界内的加减速规划
+      - ACC 激活/待机/退出/恢复逻辑，及传感器/执行受限时的降级与告警
+      - 向动力/制动执行层输出纵向请求（扭矩/制动/减速度目标等，按架构）；不含执行器底层闭环细节
     v_model_stage:
       - 概念
   inputs_references:
     - id: PRD-ACC-001
       name: ACC 功能需求
-      version: v0.1
+      version: v0.2
       source: 产品需求文档
-      note: 待提供
+      note: 草案；含 CC/ACC 模式差异、车距档、速度范围以项目为准
+    - id: ODD-ACC-001
+      name: ACC 设计运行范围（ODD）/适用工况
+      version: v0.1
+      source: 系统需求 / 安全需求
+      note: 车速段、道路类型、天气、目标类型等
+    - id: IF-SPEC-ACC-001
+      name: ACC 对外接口说明
+      version: v0.2
+      source: 系统接口规范
+      note: 草案
     - id: SYS-ARCH-001
       name: 系统架构说明
       version: v0.4
       source: 系统架构文档
       note: 草案
-    - id: IF-SPEC-ACC-001
-      name: ACC 对外接口说明
-      version: v0.1
-      source: 系统接口规范
-      note: 待提供
   standard_requirements:
     - standard: ISO 26262
       part_clause: Part 3（Concept Phase）
-      applicability: Item Definition 作为 HARA 输入，需明确功能边界、接口与场景假设
+      applicability: Item Definition 作为 HARA 输入，需明确边界、接口与场景假设
       evidence_ref: SYS-REV-ACC-ITEM-001（计划）
+    - standard: GB/T 40429-2021
+      part_clause: 驾驶自动化等级划分
+      applicability: 1 级纵向运动控制辅助与驾驶员角色（与 L2 组合功能并存时以项目裁剪为准）
+      evidence_ref: 项目合规矩阵（待建）
+    - standard: ISO 21448
+      part_clause: SOTIF
+      applicability: 感知性能局限、误用、复杂交通流等与 malfunction 危害的切分
+      evidence_ref: SOTIF-WP-ACC-001（计划）
   project_assumptions:
     - id: ASM-ACC-ITEM-001
-      assumption: 车辆具备可用的前向目标探测能力（如雷达/摄像头融合，按项目配置）并提供目标有效位/置信度
-      impact: 目标检测与跟驰控制请求
-      risk_if_invalid: 漏检/误检导致跟驰距离控制失效
-      verification: 传感器与感知链路集成验证（场景集/实车）
+      assumption: 前向目标探测（雷达/摄像头/融合）在 ODD 内可提供满足控制周期的距离、相对速度与置信度/有效位
+      impact: 跟驰控制与目标切换
+      risk_if_invalid: 漏检/误检导致车距失控或错误加减速
+      verification: 场景集 + 实车/仿真
     - id: ASM-ACC-ITEM-002
-      assumption: 底盘/动力系统能够按 ACC 请求执行纵向加减速，并返回执行状态与限制信息（如制动温度/可用性）
-      impact: 纵向控制闭环与退出策略
-      risk_if_invalid: 请求无法执行或执行不一致导致距离失控
-      verification: 接口联调 + 端到端纵向控制测试
+      assumption: 动力与制动系统可按 ACC 请求执行纵向加减速，并反馈可用性、限制与故障（如制动热衰退、驱动限制）
+      impact: 纵向闭环与退出策略
+      risk_if_invalid: 请求未执行或执行不足
+      verification: 接口联调 + 坡道/低附着等工况测试
     - id: ASM-ACC-ITEM-003
-      assumption: HMI 告警与驾驶员接管链路可用（显示/蜂鸣/方向盘按键/踏板输入等）
-      impact: 可控性与退出/降级提示
-      risk_if_invalid: 驾驶员无法及时理解或接管
-      verification: HMI 联调 + 用户试验/评审
+      assumption: HMI 与驾驶员输入（踏板、按键、拨杆）可用，驾驶员可及时理解与接管
+      impact: 可控性（C）与退出链路
+      risk_if_invalid: 告警不足或接管延迟
+      verification: HMI 评审 + 用户试验
+    - id: ASM-ACC-ITEM-004
+      assumption: 若与 AEB 等紧急制动共存，仲裁策略明确：ACC 不应抑制正在执行的紧急制动请求（以架构与法规为准）
+      impact: 相关项间安全依赖
+      risk_if_invalid: 紧急避险能力下降
+      verification: 仲裁矩阵评审与故障注入测试
   traceability:
     - item_id: ITM-ACC-001
       upstream: PRD-ACC-001
-      downstream: HARA-ACC-001（待建）/FSC-ACC-001（待建）
+      downstream: HARA-ACC-001（待建）/ FSC-ACC-001（待建）
       verification_method: 评审
       evidence_id: SYS-REV-ACC-ITEM-001（计划）
   open_verification_items:
     - id: OVI-ACC-ITEM-001
-      item: 目标切换/插队场景下的跟驰策略与最小安全车距约束
+      item: 目标切换/插队/加塞场景下的跟驰策略、最小安全时距与舒适性边界
       owner: 待定
       due: 待定
       status: Open
     - id: OVI-ACC-ITEM-002
-      item: 低附着（雨雪冰）与坡道场景下纵向控制能力边界与退出策略
+      item: 低附着、坡道、弯道下纵向能力边界与退出/限速策略
       owner: 待定
       due: 待定
       status: Open
     - id: OVI-ACC-ITEM-003
-      item: 传感器遮挡/脏污/强反光导致目标置信度下降时的降级与告警策略
+      item: 传感器遮挡/脏污/强反光导致置信度下降时的降级、告警与可驾驶性
+      owner: 待定
+      due: 待定
+      status: Open
+    - id: OVI-ACC-ITEM-004
+      item: 与 AEB、LKA、NOP 等相关项的纵向仲裁与抑制矩阵可追溯闭环
       owner: 待定
       due: 待定
       status: Open
@@ -83,7 +112,7 @@ base:
     - role: 作者
       name: 系统安全工程师（待定）
       conclusion: N/A
-      date: 2026-03-27
+      date: 2026-03-29
     - role: 评审者
       name: 系统工程负责人（待定）
       conclusion: 待填写
@@ -93,106 +122,299 @@ base:
       conclusion: 待填写
       date: 待填写
   change_history:
+    - version: v0.2
+      date: 2026-03-29
+      summary: 对齐 Item Definition 模板与 YAML 渲染字段（ODD、安全策略、用例、状态机、实现层、diagrams 等）
+      reason: 模板升版与单一真源完整化
+      author: AI Assistant
     - version: v0.1
       date: 2026-03-27
       summary: 创建 ACC Item Definition 草案
       reason: 概念阶段初始化
       author: AI Assistant
   notes_boundary:
-    - 本文档为 Item Definition 草案，不构成 ASIL 等级最终结论。
-    - ASIL 定级需在 HARA 中按场景完成 S/E/C 评估并基于项目数据冻结。
-    - 对“无故障但性能不足/误用”引发风险的部分，应另行开展 ISO 21448（SOTIF）分析并与 ISO 26262 结论分开记录。
+    - 本文为 Item Definition 草案；ASIL（Automotive Safety Integrity Level，汽车安全完整性等级）仅在 HARA 中结合场景与证据判定。
+    - malfunction（功能异常）与「无故障但性能不足/误用」应区分记录；后者宜在 ISO 21448（SOTIF）中分析。
+    - 若项目将 ACC 与横向车道辅助打包为 L2 组合功能，仍应通过接口与仲裁明确纵向 ACC 相关项边界。
 
 content:
   item_overview:
     item_name: ACC（Adaptive Cruise Control，自适应巡航控制）
-    functional_objective: 在限定工况下自动维持设定车速，并基于前向目标信息调节纵向加减速以保持设定车距；当系统能力不足或驾驶员操作时，退出 ACC 并提示驾驶员接管。
+    functional_objective: >-
+      在适用工况下维持驾驶员设定车速，并基于前向目标信息调节纵向加减速以维持设定时距；
+      在无合适目标或条件允许时恢复/维持设定车速；在系统能力受限、驾驶员操作或 ODD 不满足时退出 ACC 并提示驾驶员接管。
     non_safety_objectives:
-      - 提升跟驰舒适性（平顺加减速）
-      - 减少误触发告警与不必要退出
-      - 适应常见交通流变化（插队/加塞）
+      - 平顺跟驰与调速，减少突兀加减速
+      - 降低误退出与不必要的告警
+      - 在典型交通流（切入/加塞）下保持可接受的跟驰行为
+
+  driving_automation:
+    level: "1（驾驶员辅助；纵向车距与调速；不含横向车道保持）"
+    standard: GB/T 40429-2021（若与 L2 组合功能并存，以项目声明与合规矩阵为准）
+    role_phases:
+      - phase: 激活前
+        user_role: 确认车速/时距设定与交通环境，按需启动 ACC
+        system_role: 自检车速范围、传感器与执行链路，不满足则禁止激活
+      - phase: 运行中
+        user_role: 持续监控路况与前车变化，随时准备制动或转向；对动态驾驶任务保持监控与应对
+        system_role: 执行纵向目标选择、时距与调速控制，输出状态与告警
+      - phase: 退出后
+        user_role: 完全承担纵向与横向驾驶任务
+        system_role: 进入非 ACC 状态，保留必要提示
+
+  odd:
+    reference: 见 ODD-ACC-001（车速范围、道路类型、天气、最小目标类型等以项目冻结为准）；无单独 ODD 文档时可在项目 SSTS 中定义并在此引用
+
+  vehicle_safety_strategy:
+    laws: 目标市场道路安全与车辆辅助驾驶相关强制性要求由合规部门维护，本文档不逐条断言合规结论。
+    driving_behavior: 跟驰行为应可预期，避免不必要急刹；在能力受限时及时退出或降级并提示；与 AEB 等紧急制动协同时遵循项目仲裁策略。
+    sotif_residual: >-
+      整车层对「性能局限导致的风险」的接受准则见项目 SOTIF 计划；ACC 相关场景（如复杂切入、传感器退化）须可追溯至验证证据，
+      与 ISO 26262 malfunction 危害区分记录。
+
+  alerts_degradation:
+    alerts:
+      - ACC 可用/激活/待机/退出提示（仪表/声学/振动，按 HMI）
+      - 车距档/设定车速显示与接管请求
+    rationale: >-
+      目标丢失、置信度不足、执行器限制、踏板优先、关键信号失效时退出或进入保守模式；
+      地图/限速信息若参与调速（如 ISA 协同），失效时回退到纯 ACC 行为（项目定义）。
+    rm_states:
+      - state: ACC_Active
+        description: 正常跟驰或定速（无目标或目标稳定）
+        note: ""
+      - state: ACC_Standby
+        description: 已就绪未激活或短暂待机
+        note: ""
+      - state: ACC_Brake_Only
+        description: 仅保留部分能力（示例：仅定速无跟车，项目可定义）
+        note: 可选命名
+      - state: ACC_Off
+        description: 功能关闭或退出
+        note: ""
+    triggers:
+      - trigger: 制动踏板/离合器（若适用）优先或驾驶员退出操作
+        description: 退出至 Off 或 Standby
+        note: 以驾驶员在环策略为准
+      - trigger: 目标长时间丢失或置信度低于门限
+        description: 恢复定速或退出（项目策略）
+        note: ""
+      - trigger: 执行器拒绝或通信超时
+        description: 退出并告警
+        note: ""
+
   boundary_interfaces:
     in_scope:
-      - ACC 激活/保持/退出与恢复逻辑
-      - 目标检测结果使用（目标距离/相对速度/置信度）与目标选择策略
-      - 纵向控制请求输出（加速度/减速度目标、车距设定等，按架构）
-      - 降级与告警策略（传感器不可用、执行限制等）
+      - ACC 状态机、激活/退出/恢复逻辑
+      - 目标选择与跟驰/调速控制律（算法细节见设计）
+      - 纵向请求输出与功能状态、有效位
+      - 降级与告警策略
     out_of_scope:
-      - 底盘执行闭环控制算法细节（由底盘/动力域实现）
-      - 横向控制（车道保持、转向控制等）
-      - 交通标志识别的法规策略（若涉及限速控制，需单独界定）
+      - 转向/横向车道保持（由其他相关项实现）
+      - 执行器底层控制律（由动力/制动域实现）
     interfaces:
       - id: IF-ACC-001
-        object: 感知系统（雷达/摄像头/融合，按项目）
+        object: 感知系统（雷达/摄像头/融合）
         direction: 输入
-        signal: 前向目标列表（距离/相对速度/置信度/ID）、目标有效位
-        normal_range: 周期与时延满足 ACC 控制周期，置信度满足最小要求
-        abnormal_handling: 置信度不足或目标丢失时进入保守跟驰/退出并告警
+        signal: 前向目标（距离、相对速度、ID、置信度/有效位）
+        normal_range: 周期与时延满足 ACC 控制周期
+        abnormal_handling: 低置信度时保守跟驰或退出
       - id: IF-ACC-002
-        object: 车辆状态总线（CAN/Ethernet）
+        object: 车辆状态总线
         direction: 输入
-        signal: 车速、纵向加速度、档位、制动状态、踏板/按键输入、ESC/ABS 状态
-        normal_range: 信号有效且周期满足控制需求
-        abnormal_handling: 关键状态失效触发退出 ACC 并上报故障
+        signal: 车速、加速度、踏板、档位、ESC/ABS、制动/驱动状态
+        normal_range: 关键信号有效
+        abnormal_handling: 失效时退出并上报
       - id: IF-ACC-003
-        object: 底盘/动力/制动控制器或域控
+        object: 动力/制动/域控制器
         direction: 输出
-        signal: 纵向加减速请求/目标、功能状态与有效位、限制请求
-        normal_range: 下游确认接收并反馈执行状态/限制原因
-        abnormal_handling: 通信超时/拒绝执行时退出 ACC 并告警
+        signal: 纵向加减速请求、功能状态、有效位、限制请求
+        normal_range: 下游确认并反馈执行与限制
+        abnormal_handling: 超时/拒绝时退出并告警
       - id: IF-ACC-004
         object: HMI
         direction: 输出
-        signal: ACC 可用/激活/退出、接管告警、原因码、车距设定显示
-        normal_range: 告警通路可用且优先级正确
-        abnormal_handling: HMI 不可用时禁止激活或强制退出
+        signal: 状态、车距/车速设定、接管与原因码
+        normal_range: 告警可达
+        abnormal_handling: HMI 故障时禁止激活或退出（项目策略）
+
   operating_scenarios:
     - id: SCN-ACC-001
-      description: 高速跟驰巡航（前车稳定）
-      conditions: 高速道路，良好天气，车速 60-120 km/h（以项目为准）
-      driver_state: 正常驾驶，手握方向盘监督
+      description: 高速稳定跟驰
+      conditions: 结构化道路，车速 60–120 km/h（示例），天气在 ODD 内
+      driver_state: 监控路况，手眼在环
       note: 基线场景
     - id: SCN-ACC-002
-      description: 城市快速路车流变化（插队/切入）
-      conditions: 30-90 km/h，车流密集，前车频繁变道
-      driver_state: 注意力需要保持，可能频繁介入
+      description: 城市快速路车流变化（切入/插队）
+      conditions: 30–90 km/h，车流密集
+      driver_state: 注意力需求高，可能频繁调整
       note: 目标切换关键场景
     - id: SCN-ACC-003
-      description: 下坡/弯道导致制动能力受限或目标误差增大
-      conditions: 坡道/弯道，路面附着变化
-      driver_state: 需要随时介入
-      note: 执行限制与退出策略场景
+      description: 下坡/弯道/低附着
+      conditions: 坡道、弯道、雨雪冰
+      driver_state: 需随时准备接管
+      note: 执行限制与退出策略
     - id: SCN-ACC-004
-      description: 恶劣天气/传感器遮挡导致目标置信度下降
-      conditions: 大雨/雾/强反光，传感器脏污/遮挡
-      driver_state: 需要及时接管
-      note: 降级/告警场景
+      description: 恶劣天气/传感器退化
+      conditions: 大雨雾、脏污、遮挡
+      driver_state: 需及时接管
+      note: 降级与告警
+
+  function_partition:
+    - subfunction: 目标检测与跟踪
+      description: 主目标选择与切换逻辑
+      note: 感知融合
+    - subfunction: 纵向规划与控制
+      description: 时距、调速、舒适性限制
+      note: 控制周期与 Jerk 限值
+    - subfunction: ACC 状态机
+      description: 激活/退出/待机
+      note: 安全相关
+    - subfunction: HMI 与请求仲裁
+      description: 驾驶员设定与多相关项协同（若存在）
+      note: 接口规范
+
+  use_cases:
+    - id: UC-ACC-001
+      name: 高速公路稳定跟车
+      primary_actors: 驾驶员、ACC
+      secondary_actors: 感知、执行、HMI
+      preconditions: 车速与道路在 ODD 内，传感器可用
+      main_success: 稳定维持时距，车速在设定与目标约束下协调变化
+      extensions: 前车减速/加速、目标切换
+    - id: UC-ACC-002
+      name: 邻车切入/加塞
+      primary_actors: 驾驶员、ACC
+      secondary_actors: 感知
+      preconditions: 新目标进入探测范围
+      main_success: 平滑过渡至新车距，无异常急刹（除非安全需要）
+      extensions: 目标 ID 切换抖动抑制
+    - id: UC-ACC-003
+      name: 无目标时恢复定速
+      primary_actors: 驾驶员、ACC
+      secondary_actors: 执行
+      preconditions: 车道前方无有效目标
+      main_success: 加速至设定车速或维持设定车速
+      extensions: 弯道/限速协同（若项目配置）
+
+  functional_runtime_state:
+    states:
+      - state: "Off"
+        description: 功能关闭或未就绪
+        note: ""
+      - state: Standby
+        description: 待机，条件满足可激活
+        note: ""
+      - state: Active
+        description: ACC 运行（跟车或定速子模式由项目定义）
+        note: ""
+      - state: Degraded
+        description: 能力受限（如仅定速）
+        note: 可选
+    transitions:
+      - trigger: 驾驶员激活且条件满足
+        description: Standby → Active
+        note: ""
+      - trigger: 退出条件满足（踏板/故障/ODD）
+        description: Active → Standby/Off
+        note: ""
+      - trigger: 传感器或执行受限
+        description: 进入 Degraded 或退出
+        note: ""
+    notes: 与降级策略表及项目 UML 对齐。
+
+  foreseeable_misuse:
+    - id: 1
+      description: 双手离开方向盘、分心导致无法及时接管（ACC 不减轻横向监控义务）
+      note: HARA/SOTIF 可控性
+    - id: 2
+      description: 在不适用的道路或天气下强行使用 ACC
+      note: ODD 与 HMI
+    - id: 3
+      description: 过度信任跟车距离，忽视侧向风险或切入
+      note: 培训与提示
+
+  non_functional:
+    quality: 软件需满足项目编码规范与静态分析门禁（待定义）
+    performance: 控制周期、Jerk 限制、端到端时延见 SSTS（待填数值）
+
+  dependency_other_to_this: 传感器安装与标定、轮速与纵向加速度一致性、电源与网络质量
+  dependency_this_to_other: 与 AEB、ISA、NOP 等纵向仲裁与抑制矩阵须书面化并可追溯
+  dependency_environment: 温度、振动、EMC；传感器窗口污染对探测的影响
+
   dependencies_constraints:
     - id: DEP-ACC-001
-      dependency: 前向目标检测与置信度输出
-      constraint: 关键目标在最小距离范围内可检测，输出时延受控
-      impact_if_failed: 漏检/误检导致跟驰距离控制失效
+      dependency: 前向目标检测与置信度
+      constraint: 最小距离、更新率、时延满足控制预算
+      impact_if_failed: 漏检/误检
     - id: DEP-ACC-002
-      dependency: 底盘/动力执行能力
-      constraint: 在典型工况下可提供足够减速度与响应
-      impact_if_failed: 跟驰减速不足导致追尾风险上升
+      dependency: 纵向执行能力
+      constraint: 减速度/响应时间满足跟驰安全裕度
+      impact_if_failed: 追尾风险
     - id: DEP-ACC-003
-      dependency: 驾驶员告警与接管机制
-      constraint: 告警可达、可理解，接管输入可被系统可靠识别
-      impact_if_failed: 可控性下降，退出后驾驶员无法及时接管
+      dependency: 驾驶员介入检测与 HMI
+      constraint: 踏板优先、退出可靠、告警清晰
+      impact_if_failed: 可控性下降
+
   known_failures_initial_concerns:
     - id: CON-ACC-001
-      concern: 漏检前车或目标切换错误导致未及时减速，车距不足
+      concern: 漏检或目标切换错误导致未及时减速，车距不足
       source: 经验/评审
       severity_preliminary: 待定
-      downstream: 输入 HARA 危害事件
+      downstream: HARA
     - id: CON-ACC-002
-      concern: 错误加速/减速请求导致突兀纵向控制，引发追尾或被追尾风险
+      concern: 错误加减速请求导致突兀纵向动作，引发追尾或被追尾
       source: 评审
       severity_preliminary: 待定
-      downstream: 输入 HARA 危害事件
+      downstream: HARA
     - id: CON-ACC-003
-      concern: 能力不足场景未及时退出或告警不明确，驾驶员未及时接管
+      concern: 能力不足场景未及时退出或告警不足，驾驶员未及时接管
       source: 人机评审
       severity_preliminary: 待定
-      downstream: 输入 HARA（可控性假设）
+      downstream: HARA（E/C）
+    - id: CON-ACC-004
+      concern: 与 AEB 等紧急制动仲裁错误导致紧急避险能力下降
+      source: 接口分析
+      severity_preliminary: 待定
+      downstream: FSC 协同
+
+  known_failure_modes: 目标跟踪丢失、控制请求与执行不一致、通信超时、传感器系统性漏检
+  known_trigger_conditions: 强雨雪、眩光、雷达遮挡、总线故障、制动热衰退限制
+
+  operational_safety_assurance:
+    operational_design: 运行数据记录、OTA 与配置变更影响分析（若适用）按项目运维安全计划执行
+
+  implementation:
+    architecture: 感知 → ACC 应用（目标/规划/状态机）→ 纵向执行请求；HMI 与仲裁并行。
+    architecture_elements:
+      - element: 前向感知与融合
+        description: 目标列表与置信度
+        note: 供应商责任边界见设计
+      - element: ACC 应用 ECU/软件组件
+        description: 跟驰、定速、状态机
+        note: 与标定强相关
+      - element: 纵向执行接口
+        description: 扭矩/制动请求与反馈
+        note: 见 IF-SPEC-ACC-001
+      - element: HMI
+        description: 设定与告警呈现
+        note: 优先级策略
+    interfaces_brief:
+      - interface: IF-ACC-001～004
+        description: 详见边界接口表；信号级映射见接口规范
+        note: 与 FSC/TSR 追溯待建
+    nf_performance: 控制周期与执行器响应预算从概念阶段非功能要求拆解（待填数）
+    element_failure_modes: 感知失效、请求异常、执行器饱和、显示失效
+    element_trigger_conditions: 与功能层面局限对应并细化到组件（待 FMEA 对齐）
+
+  diagrams:
+    - id: DIAG-ACC-ARCH-001
+      title: ACC 逻辑架构与数据流（示意）
+      placement: item_architecture
+      file_stem: acc_architecture_context
+      mermaid: |
+        flowchart LR
+          Perc["前向感知"] --> ACC["ACC 应用\n目标·规划·状态机"]
+          Veh["车辆状态"] --> ACC
+          ACC --> Pwr["动力/制动执行"]
+          ACC --> Hmi["HMI"]
